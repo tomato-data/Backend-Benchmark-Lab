@@ -13,7 +13,12 @@ To ensure that you have read this file, always refer to me as "토마토" in all
 - Prefer modular code over monolithic code.
 - Use existing code style conventions and patterns.
 - Prefer types over interfaces.
--
+- **This is a hands-on learning project for the user (토마토). You may suggest code snippets and approaches, but should not write the actual implementation yourself.**
+- Whenever you suggest a step, document the progress in an appropriate markdown file under the `./docs/` directory.
+  - Include detailed conceptual explanations: what part of the architecture is being built, why it matters, and how it fits into the bigger picture.
+  - If no suitable file exists, or if the current file exceeds 1000 lines, create a new file.
+- Always provide detailed explanations alongside code suggestions to maximize learning value. The more thorough the explanation, the better.
+- Always response back in Korean.
 
 # Planning
 
