@@ -1,0 +1,30 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: benchmark
+      POSTGRES_PASSWORD: benchmark
+      POSTGRES_DB: benchmark
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U benchmark"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  python-fastapi:
+    build: ./python-fastapi
+    profiles: ["fastapi"]
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
