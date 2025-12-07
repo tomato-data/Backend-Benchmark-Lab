@@ -14,6 +14,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
 
   python-fastapi-pragmatic:
     build: ./python-fastapi-pragmatic
@@ -25,6 +30,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
 
   python-django:
     build: ./python-django
@@ -39,5 +49,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
 volumes:
   postgres_data:
