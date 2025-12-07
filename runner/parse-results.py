@@ -30,6 +30,7 @@ def parse_summary_json(filepath: Path) -> dict[str, float] | None:
             "rps": metrics.get("http_reqs", {}).get("rate", 0),
             "latency_avg": metrics.get("http_req_duration", {}).get("avg", 0),
             "latency_p95": metrics.get("http_req_duration", {}).get("p(95)", 0),
+            "latency_p99": metrics.get("http_req_duration", {}).get("p(99)", 0),
         }
     except (json.JSONDecodeError, FileNotFoundError):
         return None
@@ -80,6 +81,7 @@ def calculate_averages(files: list[Path]) -> dict[str, float | int] | None:
     rps_list: list[float] = []
     latency_avg_list: list[float] = []
     latency_p95_list: list[float] = []
+    latency_p99_list: list[float] = []
 
     for f in files:
         if not f.exists():
@@ -89,6 +91,7 @@ def calculate_averages(files: list[Path]) -> dict[str, float | int] | None:
             rps_list.append(metrics["rps"])
             latency_avg_list.append(metrics["latency_avg"])
             latency_p95_list.append(metrics["latency_p95"])
+            latency_p99_list.append(metrics["latency_p99"])
 
     if not rps_list:
         return None
@@ -99,6 +102,7 @@ def calculate_averages(files: list[Path]) -> dict[str, float | int] | None:
         "rps_std": round(stdev(rps_list), 2) if len(rps_list) > 1 else 0,
         "latency_avg": round(mean(latency_avg_list), 3),
         "latency_p95": round(mean(latency_p95_list), 3),
+        "latency_p99": round(mean(latency_p99_list), 3),
     }
 
 
@@ -108,8 +112,12 @@ def print_markdown_table(results: dict[str, dict[str, dict[str, float | int]]]) 
         print("No results to display.")
         return
 
-    print("| Server | Scenario | Runs | RPS (avg±std) | Latency avg | Latency p95 |")
-    print("|--------|----------|------|---------------|-------------|-------------|")
+    print(
+        "| Server | Scenario | Runs | RPS (avg±std) | Latency avg | Latency p95 | Latency p99 |"
+    )
+    print(
+        "|--------|----------|------|---------------|-------------|-------------|-------------|"
+    )
 
     for server in sorted(results.keys()):
         for scenario in SCENARIOS:
@@ -117,7 +125,7 @@ def print_markdown_table(results: dict[str, dict[str, dict[str, float | int]]]) 
                 data = results[server][scenario]
                 rps = f"{data['rps_avg']}±{data['rps_std']}"
                 print(
-                    f"| {server} | {scenario} | {data['runs']} | {rps} | {data['latency_avg']}ms | {data['latency_p95']}ms |"
+                    f"| {server} | {scenario} | {data['runs']} | {rps} | {data['latency_avg']}ms | {data['latency_p95']}ms | {data['latency_p99']}ms |"
                 )
 
 
