@@ -46,12 +46,22 @@ run_scenario() {
   fi
 }
 
+START_FROM=${1:-01}
+
 # 메인 실행
 wait_for_server
 RESULTS_DIR="../results/${SERVER_NAME}/$(date +%Y-%m-%d)"
 mkdir -p "$RESULTS_DIR"
 
 for scenario in "$SCENARIOS_DIR"/0*.js; do
+  name=$(basename "$scenario" .js)
+  scenario_num=${name:0:2}
+
+  if [[ "$scenario_num" < "$START_FROM" ]]; then
+    echo "Skipping $name..."
+    continue
+  fi
+
   run_scenario "$scenario"
 done
 
