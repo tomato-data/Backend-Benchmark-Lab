@@ -27,6 +27,14 @@ reset_db() {
     psql -U benchmark -d benchmark
 }
 
+# 서버 컨테이너 재시작 함수
+restart_server() {
+  echo "Restarting server container to clear memory..."
+  docker compose -f ../implementations/docker-compose.yml restart $(docker compose -f ../implementations/docker-compose.yml ps --services | grep -v postgres)
+  sleep 5
+  wait_for_server
+}
+
 # 시나리오 실행 함수
 run_scenario() {
   local scenario=$1
@@ -60,6 +68,11 @@ for scenario in "$SCENARIOS_DIR"/0*.js; do
   if [[ "$scenario_num" < "$START_FROM" ]]; then
     echo "Skipping $name..."
     continue
+  fi
+
+  # 08번 전에 서버 재시작 (메모리 정리)
+  if [[ "$name" == "08-concurrent-mixed" ]]; then
+    restart_server
   fi
 
   run_scenario "$scenario"
