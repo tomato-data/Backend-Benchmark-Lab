@@ -2,7 +2,7 @@
 set -e
 
 # 설정
-RUNS=1
+RUNS=10
 SLEEP_BETWEEN=5
 SCENARIOS_DIR="../scenarios"
 
