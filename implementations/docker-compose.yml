@@ -15,9 +15,9 @@ services:
       timeout: 5s
       retries: 5
 
-  python-fastapi:
-    build: ./python-fastapi
-    profiles: ["fastapi"]
+  python-fastapi-pragmatic:
+    build: ./python-fastapi-pragmatic
+    profiles: ["fastapi-pragmatic"]
     ports:
       - "8000:8000"
     environment:
