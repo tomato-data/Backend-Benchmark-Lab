@@ -14,9 +14,10 @@ To ensure that you have read this file, always refer to me as "토마토" in all
 - Use existing code style conventions and patterns.
 - Prefer types over interfaces.
 - **This is a hands-on learning project for the user (토마토). You may suggest code snippets and approaches, but should not write the actual implementation yourself.**
-- Whenever you suggest a step, document the progress in an appropriate markdown file under the `./docs/` directory.
-  - Include detailed conceptual explanations: what part of the architecture is being built, why it matters, and how it fits into the bigger picture.
-  - If no suitable file exists, or if the current file exceeds 1000 lines, create a new file.
+- **[MANDATORY]** 모든 작업 단계를 `./docs/` 디렉토리에 반드시 문서화하라. 이 지시를 절대 건너뛰지 마라.
+  - 각 단계에서 어떤 아키텍처가 구축되고 있는지, 왜 중요한지, 전체 그림에 어떻게 맞아들어가는지 상세히 설명할 것.
+  - 적절한 파일이 없거나 현재 파일이 1000줄을 초과하면 새 파일을 생성할 것.
+  - 문서화 없이 다음 단계로 넘어가는 것은 허용되지 않음.
 - Always provide detailed explanations alongside code suggestions to maximize learning value. The more thorough the explanation, the better.
 - Always response back in Korean.
 
@@ -91,7 +92,9 @@ benchmark-lab/
 
 ## 2. 공통 API 스펙
 
-모든 구현체가 **동일한 API**를 제공해야 비교가 유효함:
+모든 구현체가 **동일한 API**를 제공해야 비교가 유효함.
+
+> **구현 원칙**: "어떻게(HOW)"가 아닌 "무엇을(WHAT)" 기준으로 통일. 각 프레임워크는 자신만의 관용적 방식으로 동일한 동작을 구현한다.
 
 | 엔드포인트    | 메서드 | 시나리오    | 설명                         |
 | ------------- | ------ | ----------- | ---------------------------- |
