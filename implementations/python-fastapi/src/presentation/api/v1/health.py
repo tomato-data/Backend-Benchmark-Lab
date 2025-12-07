@@ -8,4 +8,4 @@ router = APIRouter(tags=["health"])
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint - minimal overhead"""
-    return HealthResponse(status="ok")
+    return HealthResponse(status="ok", server="python-fastapi-pragmatic")
