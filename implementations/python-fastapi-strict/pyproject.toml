@@ -1,0 +1,14 @@
+[project]
+name = "fastapi-strict"
+version = "0.1.0"
+description = "astAPI Strict Clean Architecture - Benchmark Lab"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asyncpg>=0.31.0",
+    "fastapi>=0.124.0",
+    "pydantic>=2.12.5",
+    "python-multipart>=0.0.20",
+    "sqlalchemy[asyncio]>=2.0.45",
+    "uvicorn[standard]>=0.38.0",
+]
