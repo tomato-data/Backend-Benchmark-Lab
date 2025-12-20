@@ -1,7 +1,11 @@
+import os
+from collections.abc import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@db:5432/benchmark"
-
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/benchmark"
+)
 engine = create_async_engine(DATABASE_URL, echo=False)
 
 async_session = async_sessionmaker(engine, expire_on_commit=False)
