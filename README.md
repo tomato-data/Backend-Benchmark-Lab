@@ -6,21 +6,24 @@ Backend 프레임워크 벤치마크 비교 프로젝트.
 
 ```
 implementations/     # 각 프레임워크 구현체
-  ├── python-fastapi-pragmatic/
+  ├── python-fastapi-pragmatic/   # FastAPI 실용적 아키텍처
+  ├── python-fastapi-strict/      # FastAPI Clean Architecture
   ├── python-django/
   └── docker-compose.yml
 
 scenarios/           # k6 벤치마크 시나리오 (01~08)
 monitoring/          # Prometheus + cAdvisor + Grafana
 runner/              # 벤치마크 자동화 스크립트
+docs/                # 상세 문서
 ```
 
 ## 현재 완료
 
-| 프레임워크 | 상태 |
-|-----------|------|
-| FastAPI (async, Uvicorn) | ✅ 완료 |
-| Django (sync, Gunicorn) | ✅ 완료 |
+| 프레임워크 | 아키텍처 | 상태 |
+|-----------|---------|------|
+| FastAPI (async, Uvicorn) | Pragmatic | ✅ 완료 |
+| FastAPI (async, Uvicorn) | Strict Clean Architecture | ✅ 완료 |
+| Django (sync, Gunicorn) | DRF ViewSet | ✅ 완료 |
 
 ## 핵심 결과
 
@@ -32,9 +35,11 @@ runner/              # 벤치마크 자동화 스크립트
 ## 실행 방법
 
 ```bash
-# 벤치마크 대상 시작
+# 벤치마크 대상 시작 (택 1)
 cd implementations
-docker compose --profile fastapi-pragmatic up -d
+docker compose --profile fastapi-pragmatic up -d   # FastAPI Pragmatic
+docker compose --profile fastapi-strict up -d      # FastAPI Strict
+docker compose --profile django up -d              # Django
 
 # 벤치마크 실행
 cd runner
@@ -63,7 +68,7 @@ docker compose up -d
 
 ### Python
 
-- [ ] **FastAPI**: pragmatic vs strict, SQLAlchemy vs Raw asyncpg, Pydantic vs msgspec, Uvicorn vs Gunicorn+Uvicorn
+- [x] **FastAPI**: pragmatic vs strict ✅, SQLAlchemy vs Raw asyncpg, Pydantic vs msgspec, Uvicorn vs Gunicorn+Uvicorn
 - [ ] **Django**: sync vs async, ViewSet vs APIView, ORM vs Raw SQL, 워커 수 실험
 - [ ] **Flask**: sync vs async (Quart)
 
