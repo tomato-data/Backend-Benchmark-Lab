@@ -82,31 +82,30 @@ scenarios/
 >
 > **참고**: 랜덤 접근 패턴으로 PostgreSQL Buffer Cache 영향 최소화. 캐싱 효과 비교는 마지막 복합 시나리오에서 cold/warm 2버전으로 측정 예정.
 
-| #   | 시나리오           | 설명                                  | 상태       |
-| --- | ------------------ | ------------------------------------- | ---------- |
-| 09  | db-pagination      | OFFSET vs Cursor 페이지네이션         | 🔄 진행 중 |
-| 10  | db-column-overhead | 컬럼 수 + 데이터 타입별 조회 오버헤드 | ⏳ 예정    |
+| #   | 시나리오           | 설명                                  | 상태    |
+| --- | ------------------ | ------------------------------------- | ------- |
+| 09  | db-pagination      | OFFSET vs Cursor 페이지네이션         | ✅ 완료 |
+| 10  | db-column-overhead | 컬럼 수 + 데이터 타입별 조회 오버헤드 | ⏳ 예정 |
 | 11  | db-n-plus-one      | N+1 문제 (lazy vs eager loading)      | ⏳ 예정    |
 | 12  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)          | ⏳ 예정    |
 | 13  | db-transactions    | 복합 트랜잭션 (락 경합)               | ⏳ 예정    |
 
-### 09-db-pagination 상세
+### 09-db-pagination 상세 ✅ 완료
 
 OFFSET vs Cursor 페이지네이션 성능 비교
 
-- **테이블**: `users_large` (100,000건)
+- **테이블**: `users` (100,000건) - 기존 테이블 통합
 - **Cursor 기준**: `id` (PK) - 실무에서는 `created_at + id` Base64 인코딩 사용
 - **핵심**: OFFSET은 뒤쪽 페이지일수록 느림 (O(offset+limit)) vs Cursor는 일정 (O(limit))
+- **결과**: Cursor가 OFFSET 대비 **1.7배 빠름** (p95 기준: 34ms vs 60ms)
 
-| 작업                         | 상태       |
-| ---------------------------- | ---------- |
-| `init_pagination_data.sql`   | ✅ 완료    |
-| SQL 실행 (100,000건 시드)    | ⏳ 예정    |
-| `UserLargeModel` 추가        | ⏳ 예정    |
-| Pydantic 스키마              | ⏳ 예정    |
-| 라우터 구현 (offset, cursor) | ⏳ 예정    |
-| k6 시나리오                  | ⏳ 예정    |
-| 문서화                       | ⏳ 예정    |
+| 작업                         | 상태    |
+| ---------------------------- | ------- |
+| DB 스키마 (100,000건 시드)   | ✅ 완료 |
+| Pydantic 스키마              | ✅ 완료 |
+| 라우터 구현 (offset, cursor) | ✅ 완료 |
+| k6 시나리오                  | ✅ 완료 |
+| 문서화 (`docs/15`)           | ✅ 완료 |
 
 ### 10-db-column-overhead 상세
 
@@ -237,6 +236,7 @@ OFFSET vs Cursor 페이지네이션 성능 비교
 | `docs/12`             | Django 구현 가이드                |
 | `docs/13`             | 모니터링                          |
 | `docs/14`             | FastAPI Strict Clean Architecture |
+| `docs/15`             | DB Pagination (OFFSET vs Cursor)  |
 | `docs/99`             | 벤치마크 결과 비교표              |
 | `docs/DISCOVERIES.md` | 교훈 및 인사이트                  |
 
