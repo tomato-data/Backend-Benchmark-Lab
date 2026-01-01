@@ -19,11 +19,11 @@ docs/                # 상세 문서
 
 ## 현재 완료
 
-| 프레임워크 | 아키텍처 | 상태 |
-|-----------|---------|------|
-| FastAPI (async, Uvicorn) | Pragmatic | ✅ 완료 |
+| 프레임워크               | 아키텍처                  | 상태    |
+| ------------------------ | ------------------------- | ------- |
+| FastAPI (async, Uvicorn) | Pragmatic                 | ✅ 완료 |
 | FastAPI (async, Uvicorn) | Strict Clean Architecture | ✅ 완료 |
-| Django (sync, Gunicorn) | DRF ViewSet | ✅ 완료 |
+| Django (sync, Gunicorn)  | DRF ViewSet               | ✅ 완료 |
 
 ## 핵심 결과
 
@@ -53,6 +53,8 @@ docker compose up -d
 ```
 
 ## 향후 계획
+
+상세 로드맵: [`docs/roadmap.md`](roadmap.md)
 
 - [ ] Gunicorn + Uvicorn 조합 테스트
 - [ ] DB 쿼리 최적화 영향 측정
@@ -85,7 +87,7 @@ docker compose up -d
 
 ### 공통 실험
 
-- [ ] 워커/인스턴스 수: 1, 2, 4, (2*CPU+1)
+- [ ] 워커/인스턴스 수: 1, 2, 4, (2\*CPU+1)
 - [ ] 커넥션 풀 크기: 5, 10, 20, 50
 - [ ] JSON 라이브러리: 기본 vs 대안 (orjson, simdjson 등)
 
@@ -136,18 +138,18 @@ scenarios/
 
 **기본 원칙**: 최적화 실험은 `python-fastapi-pragmatic` 단일 프레임워크에서 Before/After 비교
 
-| 이유 | 설명 |
-|-----|------|
-| 변수 통제 | 프레임워크 차이 vs 최적화 효과 구분 명확 |
-| 중복 방지 | 쿼리 최적화는 ORM 레벨 문제, 프레임워크마다 반복 불필요 |
+| 이유           | 설명                                                    |
+| -------------- | ------------------------------------------------------- |
+| 변수 통제      | 프레임워크 차이 vs 최적화 효과 구분 명확                |
+| 중복 방지      | 쿼리 최적화는 ORM 레벨 문제, 프레임워크마다 반복 불필요 |
 | 이미 비교 완료 | 프레임워크 성능 차이는 basic 시나리오(01-08)에서 측정됨 |
 
 **예외 (프레임워크별 비교 가치 있는 경우)**:
 
-| 시나리오 | 이유 |
-|---------|------|
-| 13-cache-hit | Redis 클라이언트가 다름 (aioredis vs django-redis) |
-| 15-auth-jwt | JWT 라이브러리가 다름 (python-jose vs PyJWT vs jsonwebtoken) |
+| 시나리오     | 이유                                                         |
+| ------------ | ------------------------------------------------------------ |
+| 13-cache-hit | Redis 클라이언트가 다름 (aioredis vs django-redis)           |
+| 15-auth-jwt  | JWT 라이브러리가 다름 (python-jose vs PyJWT vs jsonwebtoken) |
 
 **결과 구조**:
 

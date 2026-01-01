@@ -4,7 +4,7 @@ set -e
 # 설정
 RUNS=10
 SLEEP_BETWEEN=5
-SCENARIOS_DIR="../scenarios"
+SCENARIOS_DIR="../scenarios/basic"
 
 
 # Health check 함수 + 서버 이름 추출
