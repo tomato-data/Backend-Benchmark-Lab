@@ -11,7 +11,7 @@ export default function () {
 
   const payload = JSON.stringify({
     name: `Test User ${uniqueId}`,
-    email: `test_${uniqueId}@benchmark.test`,
+    email: `test_${uniqueId}@benchmark.com`,
   });
 
   const headers = { "Content-Type": "application/json" };

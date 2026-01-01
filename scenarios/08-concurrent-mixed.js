@@ -32,7 +32,7 @@ export default function () {
     const uniqueId = `${__VU}_${__ITER}_${Date.now()}`;
     const payload = JSON.stringify({
       name: `Mixed User ${uniqueId}`,
-      email: `mixed_${uniqueId}@benchmark.test`,
+      email: `mixed_${uniqueId}@benchmark.com`,
     });
     const res = http.post(`${BASE_URL}/users`, payload, { headers });
     check(res, { "create 201": (r) => r.status === 201 });
