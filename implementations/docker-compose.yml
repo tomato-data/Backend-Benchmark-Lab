@@ -27,6 +27,9 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
+    volumes:
+      - ./python-fastapi-pragmatic/src:/app/src:ro
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -43,6 +46,9 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
+    volumes:
+      - ./python-fastapi-strict/src:/app/src:ro
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     depends_on:
       postgres:
         condition: service_healthy
