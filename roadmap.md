@@ -76,32 +76,80 @@ scenarios/
 
 ---
 
-## Phase 5: DB 심화 시나리오 (db-advanced) ⏳ 예정
+## Phase 5: DB 심화 시나리오 (db-advanced) 🔄 진행 중
 
 > 대상: 모든 프레임워크 (pragmatic, strict, django, ...)
+>
+> **참고**: 랜덤 접근 패턴으로 PostgreSQL Buffer Cache 영향 최소화. 캐싱 효과 비교는 마지막 복합 시나리오에서 cold/warm 2버전으로 측정 예정.
 
-| #   | 시나리오           | 설명                             | Before | After |
-| --- | ------------------ | -------------------------------- | ------ | ----- |
-| 09  | db-pagination      | OFFSET vs Cursor 페이지네이션    | ⏳     | ⏳    |
-| 10  | db-n-plus-one      | N+1 문제 (lazy vs eager loading) | ⏳     | ⏳    |
-| 11  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)     | ⏳     | ⏳    |
-| 12  | db-transactions    | 복합 트랜잭션 (락 경합)          | ⏳     | ⏳    |
+| #   | 시나리오           | 설명                                  | 상태       |
+| --- | ------------------ | ------------------------------------- | ---------- |
+| 09  | db-pagination      | OFFSET vs Cursor 페이지네이션         | 🔄 진행 중 |
+| 10  | db-column-overhead | 컬럼 수 + 데이터 타입별 조회 오버헤드 | ⏳ 예정    |
+| 11  | db-n-plus-one      | N+1 문제 (lazy vs eager loading)      | ⏳ 예정    |
+| 12  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)          | ⏳ 예정    |
+| 13  | db-transactions    | 복합 트랜잭션 (락 경합)               | ⏳ 예정    |
 
-### 구현 작업
+### 09-db-pagination 상세
 
-- [ ] 테스트 데이터 생성 스크립트 (충분한 양의 데이터)
-- [ ] 각 프레임워크에 엔드포인트 추가
-- [ ] k6 시나리오 작성
-- [ ] Before/After 비교용 runner 스크립트
+OFFSET vs Cursor 페이지네이션 성능 비교
+
+- **테이블**: `users_large` (100,000건)
+- **Cursor 기준**: `id` (PK) - 실무에서는 `created_at + id` Base64 인코딩 사용
+- **핵심**: OFFSET은 뒤쪽 페이지일수록 느림 (O(offset+limit)) vs Cursor는 일정 (O(limit))
+
+| 작업                         | 상태       |
+| ---------------------------- | ---------- |
+| `init_pagination_data.sql`   | ✅ 완료    |
+| SQL 실행 (100,000건 시드)    | ⏳ 예정    |
+| `UserLargeModel` 추가        | ⏳ 예정    |
+| Pydantic 스키마              | ⏳ 예정    |
+| 라우터 구현 (offset, cursor) | ⏳ 예정    |
+| k6 시나리오                  | ⏳ 예정    |
+| 문서화                       | ⏳ 예정    |
+
+### 10-db-column-overhead 상세
+
+컬럼 수 및 데이터 타입에 따른 조회 오버헤드 측정
+
+#### A. 컬럼 수 비교
+
+| 테이블             | 컬럼 수 | 예상 성능       |
+| ------------------ | ------- | --------------- |
+| `users_narrow`     | 5개     | 가장 빠름       |
+| `users_wide`       | 20개    | 1.5~2x 느림     |
+| `users_extra_wide` | 50개    | 2~3x 느림       |
+| `users_wide` (5개 SELECT) | 20개 중 5개 | Narrow와 유사 |
+
+#### B. 데이터 타입별 비교 (각 20개 컬럼)
+
+| 테이블                 | 타입      | 예상 순위         |
+| ---------------------- | --------- | ----------------- |
+| `users_type_int`       | INTEGER   | 1위 (가장 빠름)   |
+| `users_type_timestamp` | TIMESTAMP | 2위               |
+| `users_type_uuid`      | UUID      | 3위               |
+| `users_type_varchar`   | VARCHAR   | 4위               |
+| `users_type_text`      | TEXT      | 5위               |
+| `users_type_jsonb`     | JSONB     | 6위 (가장 느림)   |
+
+**학습 포인트**:
+- `SELECT *` 피하기
+- ORM 기본 동작 (전체 컬럼 로드) 주의
+- **Projection**의 중요성
+- **JSONB는 편리하지만 비용이 큼**
 
 ---
 
 ## Phase 6: 캐싱 시나리오 (caching) ⏳ 예정
 
+> DB Buffer Cache (Phase 5)와의 비교 포인트:
+> - Phase 5: DB 레벨 캐싱 (PostgreSQL Buffer Cache)
+> - Phase 6: 애플리케이션 레벨 캐싱 (Redis)
+
 | #   | 시나리오      | 설명                       | 상태 |
 | --- | ------------- | -------------------------- | ---- |
-| 13  | cache-hit     | Redis 캐시 히트            | ⏳   |
-| 14  | cache-miss-db | 캐시 미스 → DB → 캐시 저장 | ⏳   |
+| 14  | cache-hit     | Redis 캐시 히트            | ⏳   |
+| 15  | cache-miss-db | 캐시 미스 → DB → 캐시 저장 | ⏳   |
 
 ---
 
@@ -111,10 +159,10 @@ scenarios/
 
 | #   | 시나리오        | 설명                             | 상태 |
 | --- | --------------- | -------------------------------- | ---- |
-| 15  | auth-jwt        | JWT 생성/검증 오버헤드           | ⏳   |
-| 16  | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | ⏳   |
-| 17  | search          | 텍스트 검색 (LIKE vs Full-text)  | ⏳   |
-| 18  | real-world-flow | 인증→조회→수정→응답 E2E          | ⏳   |
+| 16  | auth-jwt        | JWT 생성/검증 오버헤드           | ⏳   |
+| 17  | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | ⏳   |
+| 18  | search          | 텍스트 검색 (LIKE vs Full-text)  | ⏳   |
+| 19  | real-world-flow | 인증→조회→수정→응답 E2E          | ⏳   |
 
 ---
 
@@ -122,12 +170,28 @@ scenarios/
 
 | #   | 시나리오      | 설명                                 | 상태 |
 | --- | ------------- | ------------------------------------ | ---- |
-| 19  | spike-traffic | 트래픽 급증 (10→100→10 VUs)          | ⏳   |
-| 20  | long-running  | 장시간 부하 (5분+), 메모리 누수 탐지 | ⏳   |
+| 20  | spike-traffic | 트래픽 급증 (10→100→10 VUs)          | ⏳   |
+| 21  | long-running  | 장시간 부하 (5분+), 메모리 누수 탐지 | ⏳   |
 
 ---
 
-## Phase 9: Variant 실험 ⏳ 예정
+## Phase 9: 복합 시나리오 (cold/warm 비교) ⏳ 예정
+
+> DB Buffer Cache + Redis Cache 효과를 극적으로 비교
+
+| 시나리오            | 설명                         |
+| ------------------- | ---------------------------- |
+| 22-mixed-cold       | 서버 재시작 후 첫 실행       |
+| 22-mixed-warm       | 동일 요청 반복 후 실행       |
+
+**측정 포인트**:
+- PostgreSQL Buffer Cache 워밍업 효과
+- Redis 캐시 히트율 변화
+- 전체 응답 시간 차이
+
+---
+
+## Phase 10: Variant 실험 ⏳ 예정
 
 ### FastAPI
 

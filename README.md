@@ -113,9 +113,13 @@ scenarios/
 #### DB 심화 (09-12)
 
 - [ ] **09-db-pagination**: OFFSET vs Cursor 페이지네이션
+  - Cursor는 `id`(PK) 기준으로 구현. 실무에서는 `created_at + id` 조합을 Base64 인코딩하여 사용하지만, 성능 비교 목적으로는 단순 id가 더 명확함
+  - 랜덤 페이지 접근으로 DB 캐싱 효과 최소화 (cold 기준 측정)
 - [ ] **10-db-n-plus-one**: N+1 문제 (lazy vs eager loading)
 - [ ] **11-db-bulk-operations**: 대량 INSERT/UPDATE (1000건+)
 - [ ] **12-db-transactions**: 복합 트랜잭션 (락 경합)
+
+> **참고**: DB 심화 시나리오는 랜덤 접근 패턴으로 PostgreSQL Buffer Cache 영향을 최소화. 캐싱 효과 비교는 마지막 복합 시나리오에서 cold/warm 2버전으로 측정 예정.
 
 #### 캐싱 (13-14)
 
