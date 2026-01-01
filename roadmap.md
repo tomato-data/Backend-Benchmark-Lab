@@ -85,7 +85,7 @@ scenarios/
 | #   | 시나리오           | 설명                                  | 상태    |
 | --- | ------------------ | ------------------------------------- | ------- |
 | 09  | db-pagination      | OFFSET vs Cursor 페이지네이션         | ✅ 완료 |
-| 10  | db-column-overhead | 컬럼 수 + 데이터 타입별 조회 오버헤드 | ⏳ 예정 |
+| 10  | db-column-overhead | 컬럼 수 + 데이터 타입별 조회 오버헤드 | ✅ 완료 |
 | 11  | db-n-plus-one      | N+1 문제 (lazy vs eager loading)      | ⏳ 예정    |
 | 12  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)          | ⏳ 예정    |
 | 13  | db-transactions    | 복합 트랜잭션 (락 경합)               | ⏳ 예정    |
@@ -107,9 +107,14 @@ OFFSET vs Cursor 페이지네이션 성능 비교
 | k6 시나리오                  | ✅ 완료 |
 | 문서화 (`docs/15`)           | ✅ 완료 |
 
-### 10-db-column-overhead 상세
+### 10-db-column-overhead 상세 ✅ 완료
 
 컬럼 수 및 데이터 타입에 따른 조회 오버헤드 측정
+
+- **결과**: 컬럼 5개 → 50개 (10배) 증가 시 성능 **1.45배** 저하
+- **인사이트**: 예상보다 선형적이지 않음 → 네트워크/직렬화가 더 큰 영향
+- **데이터 타입**: 모든 타입 36~41ms로 차이 미미 (±7%), JSONB만 약간 느림
+- **Cold Start 발견**: k6 그룹 첫 번째 호출 시 +10ms 오버헤드 발생
 
 #### A. 컬럼 수 비교
 
@@ -243,6 +248,7 @@ OFFSET vs Cursor 페이지네이션 성능 비교
 | `docs/13`             | 모니터링                          |
 | `docs/14`             | FastAPI Strict Clean Architecture |
 | `docs/15`             | DB Pagination (OFFSET vs Cursor)  |
+| `docs/16`             | DB Column Overhead (컬럼 수/타입) |
 | `docs/99`             | 벤치마크 결과 비교표              |
 | `docs/DISCOVERIES.md` | 교훈 및 인사이트                  |
 
