@@ -1,6 +1,10 @@
 from sqlalchemy import String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from datetime import datetime
+from sqlalchemy import DateTime
+from sqlalchemy.sql import func
+
 
 class Base(DeclarativeBase):
     pass
@@ -12,3 +16,4 @@ class UserModel(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(255), unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())

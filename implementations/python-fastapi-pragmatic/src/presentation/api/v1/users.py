@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infrastructure.database.connection import get_db
 from src.infrastructure.database.models import UserModel
-from src.presentation.schemas.user import UserCreate, UserUpdate, UserResponse
+from src.presentation.schemas.user import (
+    UserCreate,
+    UserUpdate,
+    UserResponse,
+    PaginatedOffsetResponse,
+    PaginatedCursorResponse,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -15,15 +21,6 @@ async def get_users(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(UserModel))
     models = result.scalars().all()
     return [UserResponse.model_validate(m) for m in models]
-
-
-@router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
-    """Get user by ID - DB read performance"""
-    model = await db.get(UserModel, user_id)
-    if model is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return UserResponse.model_validate(model)
 
 
 @router.post("", response_model=UserResponse, status_code=201)
@@ -63,3 +60,72 @@ async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
 
     await db.delete(model)
     await db.commit()
+
+
+# OFFSET 페이지네이션
+@router.get("/offset", response_model=PaginatedOffsetResponse)
+async def get_users_offset(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """OFFSET 페이지네이션 - 뒤쪽 페이지일수록 느림"""
+    offset = (page - 1) * size
+
+    # 전체 개수
+    total = (
+        await db.execute(select(func.count()).select_from(UserModel))
+    ).scalar() or 0
+
+    # 데이터 조회
+    query = select(UserModel).offset(offset).limit(size).order_by(UserModel.id)
+    result = await db.execute(query)
+    items = result.scalars().all()
+
+    return PaginatedOffsetResponse(
+        items=[UserResponse.model_validate(m) for m in items],
+        total=total,
+        page=page,
+        size=size,
+        total_pages=(total + size - 1) // size,
+    )
+
+
+@router.get("/cursor", response_model=PaginatedCursorResponse)
+async def get_users_cursor(
+    cursor: int = Query(0, ge=0),
+    size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """Cursor 페이지네이션 - 일정한 성능 O(limit)"""
+    # Where id > cursor (인덱스 활용)
+    query = (
+        select(UserModel)
+        .where(UserModel.id > cursor)
+        .order_by(UserModel.id)
+        .limit(size + 1)  # 다음 페이지 존재 여부 확인용 +1
+    )
+    result = await db.execute(query)
+    items = list(result.scalars().all())
+
+    # 다음 페이지 존재 여부
+    has_next = len(items) > size
+    if has_next:
+        items = items[:size]  # +1 제거
+
+    next_cursor = items[-1].id if has_next and items else None
+
+    return PaginatedCursorResponse(
+        items=[UserResponse.model_validate(m) for m in items],
+        next_cursor=next_cursor,
+        size=size,
+    )
+
+
+@router.get("/{user_id}", response_model=UserResponse)
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    """Get user by ID - DB read performance"""
+    model = await db.get(UserModel, user_id)
+    if model is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserResponse.model_validate(model)
