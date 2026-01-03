@@ -1,5 +1,5 @@
-from sqlalchemy import String, Integer, Text, Date, DateTime
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String, Integer, Text, Date, DateTime, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PG_UUID
 
 from datetime import datetime, date
@@ -191,3 +191,35 @@ class UserTypeUuidModel(Base):
     uuid_col_03: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
     uuid_col_04: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
     uuid_col_05: Mapped[uuid.UUID | None] = mapped_column(PG_UUID(as_uuid=True))
+
+
+# ============================================
+# 11-db-n-plus-one: N+1 문제 테스트
+# ============================================
+class AuthorModel(Base):
+    __tablename__ = "authors"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    bio: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+
+    # Relationship (lazy loading by default)
+    posts: Mapped[list["PostModel"]] = relationship(
+        "PostModel", back_populates="author", lazy="select"
+    )
+
+
+class PostModel(Base):
+    __tablename__ = "posts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    author_id: Mapped[int] = mapped_column(ForeignKey("authors.id"))
+    title: Mapped[str] = mapped_column(String(200))
+    content: Mapped[str | None] = mapped_column(Text)
+    view_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+
+    # Back reference
+    author: Mapped["AuthorModel"] = relationship("AuthorModel", back_populates="posts")

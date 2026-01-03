@@ -8,6 +8,7 @@ from src.presentation.api.v1 import (
     protected,
     upload,
     column_overhead,
+    n_plus_one,
 )
 
 router = APIRouter()
@@ -20,3 +21,4 @@ router.include_router(external.router)
 router.include_router(protected.router)
 router.include_router(upload.router)
 router.include_router(column_overhead.router)
+router.include_router(n_plus_one.router)

@@ -90,6 +90,13 @@ scenarios/
 | 12  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)          | ⏳ 예정    |
 | 13  | db-transactions    | 복합 트랜잭션 (락 경합)               | ⏳ 예정    |
 
+### 프레임워크별 적용 현황
+
+| 시나리오 | fastapi-pragmatic | fastapi-strict | django |
+| -------- | ----------------- | -------------- | ------ |
+| 09-db-pagination | ✅ | ⏳ 예정 | ⏳ 예정 |
+| 10-db-column-overhead | ✅ | ⏳ 예정 | ⏳ 예정 |
+
 ### 09-db-pagination 상세 ✅ 완료
 
 OFFSET vs Cursor 페이지네이션 성능 비교
@@ -219,6 +226,10 @@ OFFSET vs Cursor 페이지네이션 성능 비교
 
 - [ ] 워커 수 실험: 1, 2, 4, 8, (2\*CPU+1)
 - [ ] 커넥션 풀 크기: 5, 10, 20, 50
+- [ ] **암호 해시 알고리즘**: Argon2 (cffi) vs bcrypt 성능 비교
+  - 동일 비밀번호로 해시 생성/검증 속도 측정
+  - 메모리 사용량 비교
+  - 보안 권장 설정에서의 실제 오버헤드
 
 ---
 
