@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT INTO users (name, email, created_at)
 SELECT
     'User' || g,
-    'user' || g || '@benchmark.test',
+    'user' || g || '@benchmark.com',
     NOW() - (random() * interval '30 days')
 FROM generate_series(1, 100000) AS g
 ON CONFLICT (email) DO NOTHING;
@@ -228,7 +228,7 @@ INSERT INTO users_extra_wide (
 )
 SELECT
     'User' || g,
-    'extrawide' || g || '@benchmark.test',
+    'extrawide' || g || '@benchmark.com',
     'val_01_' || g, 'val_02_' || g, 'val_03_' || g, 'val_04_' || g, 'val_05_' || g,
     'val_06_' || g, 'val_07_' || g, 'val_08_' || g, 'val_09_' || g, 'val_10_' || g,
     'val_11_' || g, 'val_12_' || g, 'val_13_' || g, 'val_14_' || g, 'val_15_' || g,
@@ -323,3 +323,57 @@ SELECT
     gen_random_uuid()
 FROM generate_series(1, 100000) AS g
 ON CONFLICT (email) DO NOTHING;
+
+
+-- ============================================
+-- 11-db-n-plus-one: N+1 문제 테스트
+-- ============================================
+
+-- 1. Authors 테이블 (1,000명)
+CREATE TABLE IF NOT EXISTS authors (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    bio TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 2. Posts 테이블 (각 author당 5~15개 → 약 10,000 건)
+CREATE TABLE IF NOT EXISTS posts (
+    id SERIAL PRIMARY KEY,
+    author_id INTEGER NOT NULL REFERENCES authors(id),
+    title VARCHAR(200) NOT NULL,
+    content TEXT,
+    view_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 3. FK 인덱스 (N+1 eager loading 시 필수)
+CREATE INDEX IF NOT EXISTS idx_posts_author_id ON posts(author_id);
+
+-- ============================================
+-- 시드 데이터: authors (1,000명)
+-- ============================================
+INSERT INTO authors (name, email, bio, created_at)
+SELECT
+    'Author' || g,
+    'author' || g || '@benchmark.com',
+    'Bio for author ' || g || '. Writer and content creator.',
+    NOW() - (random() * interval '365 days')
+FROM generate_series(1, 1000) AS g
+ON CONFLICT (email) DO NOTHING;
+
+
+-- ============================================
+-- 시드 데이터: posts (각 author당 5~15개, 약 10,000건)
+-- ============================================
+INSERT INTO posts (author_id, title, content, view_count, created_at)
+SELECT
+    a.id,
+    'Post ' || p || ' by Author ' || a.id,
+    'Content of post ' || p || '. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    (random() * 10000)::int,
+    a.created_at + (p || ' days')::interval
+FROM authors a
+CROSS JOIN LATERAL generate_series(1, 5 + (random() * 10)::int) AS p
+ON CONFLICT DO NOTHING;
