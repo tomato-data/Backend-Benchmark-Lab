@@ -14,6 +14,7 @@ router = APIRouter(prefix="/n-plus-one", tags=["n-plus-one"])
 @router.get("/lazy", response_model=list[AuthorWithPostsResponse])
 async def get_authors_lazy(
     limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -22,7 +23,7 @@ async def get_authors_lazy(
     - N번: 각 author마다 SELECT * FROM posts WHERE author_id = ?
     """
     # 1. Authors 조회
-    authors_query = select(AuthorModel).limit(limit)
+    authors_query = select(AuthorModel).offset(offset).limit(limit)
     result = await db.execute(authors_query)
     authors = result.scalars().all()
 
@@ -33,23 +34,25 @@ async def get_authors_lazy(
         posts_result = await db.execute(posts_query)
         posts = posts_result.scalars().all()
 
-        response.append({
-            "id": author.id,
-            "name": author.name,
-            "email": author.email,
-            "bio": author.bio,
-            "created_at": author.created_at,
-            "posts": [
-                {
-                    "id": p.id,
-                    "title": p.title,
-                    "content": p.content,
-                    "view_count": p.view_count,
-                    "created_at": p.created_at,
-                }
-                for p in posts
-            ],
-        })
+        response.append(
+            {
+                "id": author.id,
+                "name": author.name,
+                "email": author.email,
+                "bio": author.bio,
+                "created_at": author.created_at,
+                "posts": [
+                    {
+                        "id": p.id,
+                        "title": p.title,
+                        "content": p.content,
+                        "view_count": p.view_count,
+                        "created_at": p.created_at,
+                    }
+                    for p in posts
+                ],
+            }
+        )
 
     return response
 
@@ -57,13 +60,19 @@ async def get_authors_lazy(
 @router.get("/eager", response_model=list[AuthorWithPostsResponse])
 async def get_authors_eager(
     limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     """
     Eager Loading (joinedload) - 1번의 JOIN 쿼리
     - SELECT authors.*, posts.* FROM authors LEFT JOIN posts ON ...
     """
-    query = select(AuthorModel).options(joinedload(AuthorModel.posts)).limit(limit)
+    query = (
+        select(AuthorModel)
+        .options(joinedload(AuthorModel.posts))
+        .offset(offset)
+        .limit(limit)
+    )
     result = await db.execute(query)
     authors = result.unique().scalars().all()
     return authors
@@ -72,6 +81,7 @@ async def get_authors_eager(
 @router.get("/subquery", response_model=list[AuthorWithPostsResponse])
 async def get_authors_subquery(
     limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -79,7 +89,12 @@ async def get_authors_subquery(
     - 1번: SELECT * FROM authors
     - 2번: SELECT * FROM posts WHERE author_id IN (...)
     """
-    query = select(AuthorModel).options(selectinload(AuthorModel.posts)).limit(limit)
+    query = (
+        select(AuthorModel)
+        .options(selectinload(AuthorModel.posts))
+        .offset(offset)
+        .limit(limit)
+    )
     result = await db.execute(query)
     authors = result.scalars().all()
     return authors
