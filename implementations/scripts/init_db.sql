@@ -5,7 +5,7 @@
 -- 멱등성: IF NOT EXISTS / ON CONFLICT DO NOTHING
 
 -- ============================================
--- 1. Users 테이블 (기본 + pagination)
+-- 1. Users 테이블 (01~08 기본 시나리오용, 1,000명)
 -- ============================================
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -14,11 +14,30 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
--- 100,000건 시드 (ON CONFLICT로 멱등성 보장)
+-- 1,000건 시드 (01~08 시나리오용)
 INSERT INTO users (name, email, created_at)
 SELECT
     'User' || g,
     'user' || g || '@benchmark.com',
+    NOW() - (random() * interval '30 days')
+FROM generate_series(1, 1000) AS g
+ON CONFLICT (email) DO NOTHING;
+
+-- ============================================
+-- 2. Users Pagination 테이블 (09 페이지네이션 시나리오용, 100,000명)
+-- ============================================
+CREATE TABLE IF NOT EXISTS users_pagination (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 100,000건 시드 (09 페이지네이션 시나리오용)
+INSERT INTO users_pagination (name, email, created_at)
+SELECT
+    'User' || g,
+    'pagination' || g || '@benchmark.com',
     NOW() - (random() * interval '30 days')
 FROM generate_series(1, 100000) AS g
 ON CONFLICT (email) DO NOTHING;
