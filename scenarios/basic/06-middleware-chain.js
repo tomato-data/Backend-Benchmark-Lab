@@ -1,7 +1,7 @@
 // scenarios/06-middleware-chain.js
 import http from "k6/http";
 import { check } from "k6";
-import { BASE_URL, defaultOptions } from "./config.js";
+import { BASE_URL, defaultOptions } from "../config.js";
 
 export const options = defaultOptions;
 

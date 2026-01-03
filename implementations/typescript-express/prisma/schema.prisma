@@ -1,0 +1,53 @@
+// Prisma Schema for Backend Benchmark Lab
+// 기존 PostgreSQL 테이블과 매핑
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// Basic 시나리오용 모델
+// ============================================
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+// ============================================
+// N+1 시나리오용 모델
+// ============================================
+
+model Author {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(255)
+  bio       String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  posts Post[]
+
+  @@map("authors")
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  authorId  Int      @map("author_id")
+  title     String   @db.VarChar(200)
+  content   String?  @db.Text
+  viewCount Int      @default(0) @map("view_count")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  author Author @relation(fields: [authorId], references: [id])
+
+  @@map("posts")
+}

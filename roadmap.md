@@ -42,13 +42,13 @@
 | Django     | DRF ViewSet                 | ✅ 완료 | ✅ 완료  |
 | Flask      | -                           | ⏳ 예정 | -        |
 
-### TypeScript (Node.js) ⏳ 예정
+### TypeScript (Node.js) 🔄 진행 중
 
-| 프레임워크 | 상태    |
-| ---------- | ------- |
-| Express    | ⏳ 예정 |
-| Fastify    | ⏳ 예정 |
-| NestJS     | ⏳ 예정 |
+| 프레임워크 | 아키텍처  | 상태    | 벤치마크 |
+| ---------- | --------- | ------- | -------- |
+| Express    | Pragmatic | ✅ 완료 | ⏳ 예정  |
+| Fastify    | -         | ⏳ 예정 | -        |
+| NestJS     | -         | ⏳ 예정 | -        |
 
 ### Go ⏳ 예정
 
@@ -86,7 +86,7 @@ scenarios/
 | --- | ------------------ | ------------------------------------- | ------- |
 | 09  | db-pagination      | OFFSET vs Cursor 페이지네이션         | ✅ 완료 |
 | 10  | db-column-overhead | 컬럼 수 + 데이터 타입별 조회 오버헤드 | ✅ 완료 |
-| 11  | db-n-plus-one      | N+1 문제 (lazy vs eager loading)      | ⏳ 예정    |
+| 11  | db-n-plus-one      | N+1 문제 (lazy vs eager loading)      | ✅ 완료 |
 | 12  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)          | ⏳ 예정    |
 | 13  | db-transactions    | 복합 트랜잭션 (락 경합)               | ⏳ 예정    |
 
@@ -96,6 +96,7 @@ scenarios/
 | -------- | ----------------- | -------------- | ------ |
 | 09-db-pagination | ✅ | ⏳ 예정 | ⏳ 예정 |
 | 10-db-column-overhead | ✅ | ⏳ 예정 | ⏳ 예정 |
+| 11-db-n-plus-one | ✅ | ⏳ 예정 | ⏳ 예정 |
 
 ### 09-db-pagination 상세 ✅ 완료
 
@@ -154,6 +155,34 @@ OFFSET vs Cursor 페이지네이션 성능 비교
 - ORM 기본 동작 (전체 컬럼 로드) 주의
 - **Projection**의 중요성
 - **JSONB는 편리하지만 비용이 큼**
+
+### 11-db-n-plus-one 상세 ✅ 완료
+
+N+1 문제와 로딩 전략별 성능 비교
+
+- **테이블**: `authors` (1,000건) + `posts` (8,000건, author당 8개)
+- **로딩 전략**: Lazy (N+1) vs Eager (joinedload) vs Subquery (selectinload)
+- **결과**: Eager가 Lazy 대비 **4.1배 빠름** (p95 기준: 24.86ms vs 102.71ms)
+
+| 로딩 전략 | 쿼리 수 | p(95) | Lazy 대비 |
+|-----------|---------|-------|-----------|
+| Lazy (N+1) | 1 + 20 = 21 | 102.71ms | 1.0x (기준) |
+| Eager (JOIN) | 1 | 24.86ms | **4.1x 빠름** |
+| Subquery (IN) | 2 | 27.99ms | **3.7x 빠름** |
+
+| 작업                         | 상태    |
+| ---------------------------- | ------- |
+| DB 스키마 (authors, posts)   | ✅ 완료 |
+| SQLAlchemy 모델 (relationship) | ✅ 완료 |
+| Pydantic 스키마              | ✅ 완료 |
+| 라우터 구현 (lazy, eager, subquery) | ✅ 완료 |
+| k6 시나리오 (랜덤 offset)    | ✅ 완료 |
+| 문서화 (`docs/17`)           | ✅ 완료 |
+
+**핵심 인사이트**:
+- Async SQLAlchemy는 의도적으로 lazy loading을 차단 (MissingGreenlet)
+- 1:Many 관계에는 `selectinload`가 적합 (중복 데이터 없음)
+- 1:1, 1:Few 관계에는 `joinedload`가 적합 (최소 쿼리)
 
 ---
 
@@ -260,9 +289,11 @@ OFFSET vs Cursor 페이지네이션 성능 비교
 | `docs/14`             | FastAPI Strict Clean Architecture |
 | `docs/15`             | DB Pagination (OFFSET vs Cursor)  |
 | `docs/16`             | DB Column Overhead (컬럼 수/타입) |
+| `docs/17`             | DB N+1 문제 (Lazy vs Eager)       |
+| `docs/18`             | TypeScript Express 구현           |
 | `docs/99`             | 벤치마크 결과 비교표              |
 | `docs/DISCOVERIES.md` | 교훈 및 인사이트                  |
 
 ---
 
-_Last updated: 2026-01-01_
+_Last updated: 2026-01-03_

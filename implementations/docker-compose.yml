@@ -29,7 +29,16 @@ services:
       DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
     volumes:
       - ./python-fastapi-pragmatic/src:/app/src:ro
-    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command:
+      [
+        "uvicorn",
+        "src.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+      ]
     depends_on:
       postgres:
         condition: service_healthy
@@ -48,7 +57,16 @@ services:
       DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
     volumes:
       - ./python-fastapi-strict/src:/app/src:ro
-    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command:
+      [
+        "uvicorn",
+        "src.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+      ]
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,6 +86,22 @@ services:
       - DB_NAME=benchmark
       - DB_USER=benchmark
       - DB_PASSWORD=benchmark
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+
+  typescript-express:
+    build: ./typescript-express
+    profiles: ["express"]
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://benchmark:benchmark@postgres:5432/benchmark
     depends_on:
       postgres:
         condition: service_healthy
