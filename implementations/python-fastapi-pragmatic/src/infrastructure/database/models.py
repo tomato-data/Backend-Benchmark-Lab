@@ -12,7 +12,20 @@ class Base(DeclarativeBase):
 
 
 class UserModel(Base):
+    """01~08 기본 시나리오용 (1,000명)"""
+
     __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+
+
+class UserPaginationModel(Base):
+    """09 페이지네이션 시나리오용 (100,000명)"""
+
+    __tablename__ = "users_pagination"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(100))

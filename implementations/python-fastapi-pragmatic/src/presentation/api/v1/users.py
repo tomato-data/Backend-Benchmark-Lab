@@ -3,7 +3,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.infrastructure.database.connection import get_db
-from src.infrastructure.database.models import UserModel
+from src.infrastructure.database.models import UserModel, UserPaginationModel
 from src.presentation.schemas.user import (
     UserCreate,
     UserUpdate,
@@ -62,7 +62,7 @@ async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
     await db.commit()
 
 
-# OFFSET 페이지네이션
+# OFFSET 페이지네이션 (09 시나리오용 - users_pagination 테이블 사용)
 @router.get("/offset", response_model=PaginatedOffsetResponse)
 async def get_users_offset(
     page: int = Query(1, ge=1),
@@ -74,11 +74,16 @@ async def get_users_offset(
 
     # 전체 개수
     total = (
-        await db.execute(select(func.count()).select_from(UserModel))
+        await db.execute(select(func.count()).select_from(UserPaginationModel))
     ).scalar() or 0
 
     # 데이터 조회
-    query = select(UserModel).offset(offset).limit(size).order_by(UserModel.id)
+    query = (
+        select(UserPaginationModel)
+        .offset(offset)
+        .limit(size)
+        .order_by(UserPaginationModel.id)
+    )
     result = await db.execute(query)
     items = result.scalars().all()
 
@@ -91,6 +96,7 @@ async def get_users_offset(
     )
 
 
+# Cursor 페이지네이션 (09 시나리오용 - users_pagination 테이블 사용)
 @router.get("/cursor", response_model=PaginatedCursorResponse)
 async def get_users_cursor(
     cursor: int = Query(0, ge=0),
@@ -100,9 +106,9 @@ async def get_users_cursor(
     """Cursor 페이지네이션 - 일정한 성능 O(limit)"""
     # Where id > cursor (인덱스 활용)
     query = (
-        select(UserModel)
-        .where(UserModel.id > cursor)
-        .order_by(UserModel.id)
+        select(UserPaginationModel)
+        .where(UserPaginationModel.id > cursor)
+        .order_by(UserPaginationModel.id)
         .limit(size + 1)  # 다음 페이지 존재 여부 확인용 +1
     )
     result = await db.execute(query)
