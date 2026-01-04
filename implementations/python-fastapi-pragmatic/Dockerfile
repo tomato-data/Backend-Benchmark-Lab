@@ -5,8 +5,8 @@
 # ============================================
 FROM python:3.12-slim AS builder
 
-# Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# Install uv (pip 사용)
+RUN pip install uv
 
 # Set working directory
 WORKDIR /app
