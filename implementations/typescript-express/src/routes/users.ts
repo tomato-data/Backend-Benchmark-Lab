@@ -4,9 +4,9 @@ import { UserCreateSchema } from "../schemas/user";
 
 const router = Router();
 
-// GET /users - 목록
+// GET /users - 목록 (전체 반환 - FastAPI와 동일)
 router.get("/", async (req, res) => {
-  const users = await prisma.user.findMany({ take: 100 });
+  const users = await prisma.user.findMany();
   res.json(users);
 });
 
