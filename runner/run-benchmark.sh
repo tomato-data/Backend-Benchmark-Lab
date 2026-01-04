@@ -237,8 +237,9 @@ for scenario in "$SCENARIOS_DIR"/0*.js; do
     continue
   fi
 
-  # 08번 전에 서버 재시작 (메모리 정리)
+  # 08번 전에 DB 리셋 + 서버 재시작 (공정한 비교를 위해)
   if [[ "$name" == "08-concurrent-mixed" ]]; then
+    init_db
     restart_server "$PROFILE"
   fi
 
