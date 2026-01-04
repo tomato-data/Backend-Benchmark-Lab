@@ -396,3 +396,18 @@ SELECT
 FROM authors a
 CROSS JOIN LATERAL generate_series(1, 5 + (random() * 10)::int) AS p
 ON CONFLICT DO NOTHING;
+
+
+-- ============================================
+-- 12-db-bulk-operations: 대량 INSERT/UPDATE 테스트
+-- ============================================
+
+-- bulk_items 테이블 (테스트 전 TRUNCATE 후 사용)
+CREATE TABLE IF NOT EXISTS bulk_items (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    value INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 초기 데이터 없음 (각 벤치마크에서 동적 생성)

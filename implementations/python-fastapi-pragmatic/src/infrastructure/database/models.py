@@ -236,3 +236,15 @@ class PostModel(Base):
 
     # Back reference
     author: Mapped["AuthorModel"] = relationship("AuthorModel", back_populates="posts")
+
+
+# ============================================
+# 12-db-bulk-operations: 대량 INSERT/UPDATE 테스트
+# ============================================
+class BulkItemModel(Base):
+    __tablename__ = "bulk_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    value: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())

@@ -87,7 +87,7 @@ scenarios/
 | 09  | db-pagination      | OFFSET vs Cursor 페이지네이션         | ✅ 완료 |
 | 10  | db-column-overhead | 컬럼 수 + 데이터 타입별 조회 오버헤드 | ✅ 완료 |
 | 11  | db-n-plus-one      | N+1 문제 (lazy vs eager loading)      | ✅ 완료 |
-| 12  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)          | ⏳ 예정    |
+| 12  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)          | ✅ 완료 |
 | 13  | db-transactions    | 복합 트랜잭션 (락 경합)               | ⏳ 예정    |
 
 ### 프레임워크별 적용 현황
@@ -97,6 +97,7 @@ scenarios/
 | 09-db-pagination | ✅ | ⏳ 예정 | ⏳ 예정 |
 | 10-db-column-overhead | ✅ | ⏳ 예정 | ⏳ 예정 |
 | 11-db-n-plus-one | ✅ | ⏳ 예정 | ⏳ 예정 |
+| 12-db-bulk-operations | ✅ | ⏳ 예정 | ⏳ 예정 |
 
 ### 09-db-pagination 상세 ✅ 완료
 
@@ -183,6 +184,36 @@ N+1 문제와 로딩 전략별 성능 비교
 - Async SQLAlchemy는 의도적으로 lazy loading을 차단 (MissingGreenlet)
 - 1:Many 관계에는 `selectinload`가 적합 (중복 데이터 없음)
 - 1:1, 1:Few 관계에는 `joinedload`가 적합 (최소 쿼리)
+
+### 12-db-bulk-operations 상세 ✅ 완료
+
+대량 INSERT/UPDATE 시 다양한 방식의 성능 비교
+
+- **테이블**: `bulk_items` (동적 생성, 매 테스트 TRUNCATE)
+- **건수**: 1,000건/요청
+- **결과**: Raw INSERT가 Individual 대비 **187배 빠름**
+
+| 방식 | p(95) | Individual 대비 |
+|------|-------|-----------------|
+| Individual INSERT | 2.98s | 1.0x (기준) |
+| Batch INSERT (add_all) | 38.86ms | **77x 빠름** |
+| Raw INSERT (VALUES) | 15.91ms | **187x 빠름** |
+| Individual UPDATE | 2.96s | 1.0x (기준) |
+| Bulk UPDATE (CASE WHEN) | 23.86ms | **124x 빠름** |
+
+| 작업                         | 상태    |
+| ---------------------------- | ------- |
+| DB 스키마 (bulk_items)       | ✅ 완료 |
+| SQLAlchemy 모델              | ✅ 완료 |
+| Pydantic 스키마              | ✅ 완료 |
+| 라우터 구현 (5가지 방식)     | ✅ 완료 |
+| k6 시나리오                  | ✅ 완료 |
+| 문서화 (`docs/19`)           | ✅ 완료 |
+
+**핵심 인사이트**:
+- commit 횟수가 성능의 99%를 결정 (1000회 vs 1회)
+- ORM 오버헤드는 약 2.4배 (Batch vs Raw)
+- 대량 처리 시 반드시 배치/벌크 방식 사용
 
 ---
 
@@ -291,9 +322,10 @@ N+1 문제와 로딩 전략별 성능 비교
 | `docs/16`             | DB Column Overhead (컬럼 수/타입) |
 | `docs/17`             | DB N+1 문제 (Lazy vs Eager)       |
 | `docs/18`             | TypeScript Express 구현           |
+| `docs/19`             | DB Bulk Operations (INSERT/UPDATE)|
 | `docs/99`             | 벤치마크 결과 비교표              |
 | `docs/DISCOVERIES.md` | 교훈 및 인사이트                  |
 
 ---
 
-_Last updated: 2026-01-03_
+_Last updated: 2026-01-04_
