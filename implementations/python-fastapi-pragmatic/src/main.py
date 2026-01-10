@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from src.infrastructure.cache.connection import close_redis
 from src.infrastructure.database.connection import engine
 from src.infrastructure.database.models import Base
 from src.presentation.api.v1.router import router as v1_router
@@ -14,6 +15,7 @@ async def lifespan(_app: FastAPI):
         await conn.run_sync(Base.metadata.create_all)
     yield
     # Shutdown: Close connections
+    await close_redis()
     await engine.dispose()
 
 

@@ -19,6 +19,23 @@ services:
         limits:
           cpus: "2"
           memory: 1G
+  redis:
+    image: redis:7-alpine
+    profiles: ["cache"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
 
   python-fastapi-pragmatic:
     build: ./python-fastapi-pragmatic
@@ -27,6 +44,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
+      REDIS_URL: redis://redis:6379/0
     volumes:
       - ./python-fastapi-pragmatic/src:/app/src:ro
     command:
@@ -55,6 +73,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
+      REDIS_URL: redis://redis:6379/0
     volumes:
       - ./python-fastapi-strict/src:/app/src:ro
     command:
@@ -86,6 +105,7 @@ services:
       - DB_NAME=benchmark
       - DB_USER=benchmark
       - DB_PASSWORD=benchmark
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       postgres:
         condition: service_healthy
@@ -102,6 +122,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://benchmark:benchmark@postgres:5432/benchmark
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
         condition: service_healthy
@@ -112,3 +133,4 @@ services:
           memory: 2G
 volumes:
   postgres_data:
+  redis_data:
