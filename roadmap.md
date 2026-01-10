@@ -88,16 +88,17 @@ scenarios/
 | 10  | db-column-overhead | 컬럼 수 + 데이터 타입별 조회 오버헤드 | ✅ 완료 |
 | 11  | db-n-plus-one      | N+1 문제 (lazy vs eager loading)      | ✅ 완료 |
 | 12  | db-bulk-operations | 대량 INSERT/UPDATE (1000건+)          | ✅ 완료 |
-| 13  | db-transactions    | 복합 트랜잭션 (락 경합)               | ⏳ 예정    |
+| 13  | db-transactions    | 복합 트랜잭션 (락 경합)               | ✅ 완료 |
 
 ### 프레임워크별 적용 현황
 
-| 시나리오 | fastapi-pragmatic | fastapi-strict | django |
-| -------- | ----------------- | -------------- | ------ |
-| 09-db-pagination | ✅ | ⏳ 예정 | ⏳ 예정 |
-| 10-db-column-overhead | ✅ | ⏳ 예정 | ⏳ 예정 |
-| 11-db-n-plus-one | ✅ | ⏳ 예정 | ⏳ 예정 |
-| 12-db-bulk-operations | ✅ | ⏳ 예정 | ⏳ 예정 |
+| 시나리오              | fastapi-pragmatic | fastapi-strict | django  |
+| --------------------- | ----------------- | -------------- | ------- |
+| 09-db-pagination      | ✅                | ⏳ 예정        | ⏳ 예정 |
+| 10-db-column-overhead | ✅                | ⏳ 예정        | ⏳ 예정 |
+| 11-db-n-plus-one      | ✅                | ⏳ 예정        | ⏳ 예정 |
+| 12-db-bulk-operations | ✅                | ⏳ 예정        | ⏳ 예정 |
+| 13-db-transactions    | ✅                | ⏳ 예정        | ⏳ 예정 |
 
 ### 09-db-pagination 상세 ✅ 완료
 
@@ -127,23 +128,23 @@ OFFSET vs Cursor 페이지네이션 성능 비교
 
 #### A. 컬럼 수 비교
 
-| 테이블             | 컬럼 수 | 예상 성능       |
-| ------------------ | ------- | --------------- |
-| `users_narrow`     | 5개     | 가장 빠름       |
-| `users_wide`       | 20개    | 1.5~2x 느림     |
-| `users_extra_wide` | 50개    | 2~3x 느림       |
+| 테이블                    | 컬럼 수     | 예상 성능     |
+| ------------------------- | ----------- | ------------- |
+| `users_narrow`            | 5개         | 가장 빠름     |
+| `users_wide`              | 20개        | 1.5~2x 느림   |
+| `users_extra_wide`        | 50개        | 2~3x 느림     |
 | `users_wide` (5개 SELECT) | 20개 중 5개 | Narrow와 유사 |
 
 #### B. 데이터 타입별 비교 (각 5개 컬럼)
 
-| 테이블                 | 타입      | 예상 순위         |
-| ---------------------- | --------- | ----------------- |
-| `users_type_int`       | INTEGER   | 1위 (가장 빠름)   |
-| `users_type_timestamp` | TIMESTAMP | 2위               |
-| `users_type_uuid`      | UUID      | 3위               |
-| `users_type_varchar`   | VARCHAR   | 4위               |
-| `users_type_text`      | TEXT      | 5위               |
-| `users_type_jsonb`     | JSONB     | 6위 (가장 느림)   |
+| 테이블                 | 타입      | 예상 순위       |
+| ---------------------- | --------- | --------------- |
+| `users_type_int`       | INTEGER   | 1위 (가장 빠름) |
+| `users_type_timestamp` | TIMESTAMP | 2위             |
+| `users_type_uuid`      | UUID      | 3위             |
+| `users_type_varchar`   | VARCHAR   | 4위             |
+| `users_type_text`      | TEXT      | 5위             |
+| `users_type_jsonb`     | JSONB     | 6위 (가장 느림) |
 
 #### B-2. 단일 컬럼 추가 비교 (향후 실험)
 
@@ -152,6 +153,7 @@ OFFSET vs Cursor 페이지네이션 성능 비교
 > 예상: 차이 미미 (1-5% 미만), 하지만 검증 필요
 
 **학습 포인트**:
+
 - `SELECT *` 피하기
 - ORM 기본 동작 (전체 컬럼 로드) 주의
 - **Projection**의 중요성
@@ -165,22 +167,23 @@ N+1 문제와 로딩 전략별 성능 비교
 - **로딩 전략**: Lazy (N+1) vs Eager (joinedload) vs Subquery (selectinload)
 - **결과**: Eager가 Lazy 대비 **4.1배 빠름** (p95 기준: 24.86ms vs 102.71ms)
 
-| 로딩 전략 | 쿼리 수 | p(95) | Lazy 대비 |
-|-----------|---------|-------|-----------|
-| Lazy (N+1) | 1 + 20 = 21 | 102.71ms | 1.0x (기준) |
-| Eager (JOIN) | 1 | 24.86ms | **4.1x 빠름** |
-| Subquery (IN) | 2 | 27.99ms | **3.7x 빠름** |
+| 로딩 전략     | 쿼리 수     | p(95)    | Lazy 대비     |
+| ------------- | ----------- | -------- | ------------- |
+| Lazy (N+1)    | 1 + 20 = 21 | 102.71ms | 1.0x (기준)   |
+| Eager (JOIN)  | 1           | 24.86ms  | **4.1x 빠름** |
+| Subquery (IN) | 2           | 27.99ms  | **3.7x 빠름** |
 
-| 작업                         | 상태    |
-| ---------------------------- | ------- |
-| DB 스키마 (authors, posts)   | ✅ 완료 |
-| SQLAlchemy 모델 (relationship) | ✅ 완료 |
-| Pydantic 스키마              | ✅ 완료 |
+| 작업                                | 상태    |
+| ----------------------------------- | ------- |
+| DB 스키마 (authors, posts)          | ✅ 완료 |
+| SQLAlchemy 모델 (relationship)      | ✅ 완료 |
+| Pydantic 스키마                     | ✅ 완료 |
 | 라우터 구현 (lazy, eager, subquery) | ✅ 완료 |
-| k6 시나리오 (랜덤 offset)    | ✅ 완료 |
-| 문서화 (`docs/17`)           | ✅ 완료 |
+| k6 시나리오 (랜덤 offset)           | ✅ 완료 |
+| 문서화 (`docs/17`)                  | ✅ 완료 |
 
 **핵심 인사이트**:
+
 - Async SQLAlchemy는 의도적으로 lazy loading을 차단 (MissingGreenlet)
 - 1:Many 관계에는 `selectinload`가 적합 (중복 데이터 없음)
 - 1:1, 1:Few 관계에는 `joinedload`가 적합 (최소 쿼리)
@@ -193,33 +196,66 @@ N+1 문제와 로딩 전략별 성능 비교
 - **건수**: 1,000건/요청
 - **결과**: Raw INSERT가 Individual 대비 **187배 빠름**
 
-| 방식 | p(95) | Individual 대비 |
-|------|-------|-----------------|
-| Individual INSERT | 2.98s | 1.0x (기준) |
-| Batch INSERT (add_all) | 38.86ms | **77x 빠름** |
-| Raw INSERT (VALUES) | 15.91ms | **187x 빠름** |
-| Individual UPDATE | 2.96s | 1.0x (기준) |
-| Bulk UPDATE (CASE WHEN) | 23.86ms | **124x 빠름** |
+| 방식                    | p(95)   | Individual 대비 |
+| ----------------------- | ------- | --------------- |
+| Individual INSERT       | 2.98s   | 1.0x (기준)     |
+| Batch INSERT (add_all)  | 38.86ms | **77x 빠름**    |
+| Raw INSERT (VALUES)     | 15.91ms | **187x 빠름**   |
+| Individual UPDATE       | 2.96s   | 1.0x (기준)     |
+| Bulk UPDATE (CASE WHEN) | 23.86ms | **124x 빠름**   |
 
-| 작업                         | 상태    |
-| ---------------------------- | ------- |
-| DB 스키마 (bulk_items)       | ✅ 완료 |
-| SQLAlchemy 모델              | ✅ 완료 |
-| Pydantic 스키마              | ✅ 완료 |
-| 라우터 구현 (5가지 방식)     | ✅ 완료 |
-| k6 시나리오                  | ✅ 완료 |
-| 문서화 (`docs/19`)           | ✅ 완료 |
+| 작업                     | 상태    |
+| ------------------------ | ------- |
+| DB 스키마 (bulk_items)   | ✅ 완료 |
+| SQLAlchemy 모델          | ✅ 완료 |
+| Pydantic 스키마          | ✅ 완료 |
+| 라우터 구현 (5가지 방식) | ✅ 완료 |
+| k6 시나리오              | ✅ 완료 |
+| 문서화 (`docs/19`)       | ✅ 완료 |
 
 **핵심 인사이트**:
+
 - commit 횟수가 성능의 99%를 결정 (1000회 vs 1회)
 - ORM 오버헤드는 약 2.4배 (Batch vs Raw)
 - 대량 처리 시 반드시 배치/벌크 방식 사용
+
+### 13-db-transactions 상세 ✅ 완료
+
+트랜잭션 락 경합(Lock Contention) 성능 및 데이터 정합성 비교
+
+- **테이블**: `products` (10개 상품, 각 재고 1000개)
+- **시나리오**: 10 VUs가 같은 상품에 동시 재고 차감
+- **결과**: Pessimistic Lock이 **100% 성공 + 13ms**로 최적
+
+| 방식            | 성공률   | p(95)    | 데이터 정합성  |
+| --------------- | -------- | -------- | -------------- |
+| No Lock         | 100%     | 15ms     | ❌ Lost Update |
+| **Pessimistic** | **100%** | **13ms** | ✅ 안전        |
+| Optimistic      | 59%      | 48ms     | ✅ (성공 시)   |
+| Serializable    | 0.6%     | 8ms      | ✅ (성공 시)   |
+
+| 작업                     | 상태    |
+| ------------------------ | ------- |
+| DB 스키마 (products)     | ✅ 완료 |
+| SQLAlchemy 모델          | ✅ 완료 |
+| Pydantic 스키마          | ✅ 완료 |
+| 라우터 구현 (4가지 방식) | ✅ 완료 |
+| k6 시나리오              | ✅ 완료 |
+| 문서화 (`docs/20`)       | ✅ 완료 |
+
+**핵심 인사이트**:
+
+- No Lock은 **절대 사용 금지** (Lost Update 발생)
+- Pessimistic Lock이 동시성 높은 환경에서 최적
+- Optimistic Lock은 충돌 적은 환경에서만 유효
+- Serializable은 동시성 높으면 사실상 사용 불가
 
 ---
 
 ## Phase 6: 캐싱 시나리오 (caching) ⏳ 예정
 
 > DB Buffer Cache (Phase 5)와의 비교 포인트:
+>
 > - Phase 5: DB 레벨 캐싱 (PostgreSQL Buffer Cache)
 > - Phase 6: 애플리케이션 레벨 캐싱 (Redis)
 
@@ -256,12 +292,13 @@ N+1 문제와 로딩 전략별 성능 비교
 
 > DB Buffer Cache + Redis Cache 효과를 극적으로 비교
 
-| 시나리오            | 설명                         |
-| ------------------- | ---------------------------- |
-| 22-mixed-cold       | 서버 재시작 후 첫 실행       |
-| 22-mixed-warm       | 동일 요청 반복 후 실행       |
+| 시나리오      | 설명                   |
+| ------------- | ---------------------- |
+| 22-mixed-cold | 서버 재시작 후 첫 실행 |
+| 22-mixed-warm | 동일 요청 반복 후 실행 |
 
 **측정 포인트**:
+
 - PostgreSQL Buffer Cache 워밍업 효과
 - Redis 캐시 히트율 변화
 - 전체 응답 시간 차이
@@ -310,21 +347,22 @@ N+1 문제와 로딩 전략별 성능 비교
 
 ## 문서화
 
-| 문서                  | 내용                              |
-| --------------------- | --------------------------------- |
-| `docs/01-05`          | 인프라 + 초기 설정                |
-| `docs/06-10`          | 시나리오 상세                     |
-| `docs/11`             | 벤치마크 자동화                   |
-| `docs/12`             | Django 구현 가이드                |
-| `docs/13`             | 모니터링                          |
-| `docs/14`             | FastAPI Strict Clean Architecture |
-| `docs/15`             | DB Pagination (OFFSET vs Cursor)  |
-| `docs/16`             | DB Column Overhead (컬럼 수/타입) |
-| `docs/17`             | DB N+1 문제 (Lazy vs Eager)       |
-| `docs/18`             | TypeScript Express 구현           |
-| `docs/19`             | DB Bulk Operations (INSERT/UPDATE)|
-| `docs/99`             | 벤치마크 결과 비교표              |
-| `docs/DISCOVERIES.md` | 교훈 및 인사이트                  |
+| 문서                  | 내용                               |
+| --------------------- | ---------------------------------- |
+| `docs/01-05`          | 인프라 + 초기 설정                 |
+| `docs/06-10`          | 시나리오 상세                      |
+| `docs/11`             | 벤치마크 자동화                    |
+| `docs/12`             | Django 구현 가이드                 |
+| `docs/13`             | 모니터링                           |
+| `docs/14`             | FastAPI Strict Clean Architecture  |
+| `docs/15`             | DB Pagination (OFFSET vs Cursor)   |
+| `docs/16`             | DB Column Overhead (컬럼 수/타입)  |
+| `docs/17`             | DB N+1 문제 (Lazy vs Eager)        |
+| `docs/18`             | TypeScript Express 구현            |
+| `docs/19`             | DB Bulk Operations (INSERT/UPDATE) |
+| `docs/20`             | DB Transactions (락 경합)          |
+| `docs/99`             | 벤치마크 결과 비교표               |
+| `docs/DISCOVERIES.md` | 교훈 및 인사이트                   |
 
 ---
 

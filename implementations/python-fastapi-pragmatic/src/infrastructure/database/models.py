@@ -248,3 +248,19 @@ class BulkItemModel(Base):
     name: Mapped[str] = mapped_column(String(100))
     value: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+
+
+# ============================================
+# 13-db-transactions: 트랜잭션 락 경합 테스트
+# ============================================
+class ProductModel(Base):
+    __tablename__ = "products"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    stock: Mapped[int] = mapped_column(Integer, default=0)
+    version: Mapped[int] = mapped_column(Integer, default=0)
+    # Optimistic Lock
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=func.now(), onupdate=func.now()
+    )

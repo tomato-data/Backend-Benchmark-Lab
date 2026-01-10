@@ -411,3 +411,26 @@ CREATE TABLE IF NOT EXISTS bulk_items (
 );
 
 -- 초기 데이터 없음 (각 벤치마크에서 동적 생성)
+
+-- ============================================
+-- 13-db-transactions: 트랜잭션 락 경합 테스트
+-- ============================================
+
+-- products 테이블 (재고 관리용)
+CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 0,
+    version INTEGER NOT NULL DEFAULT 0, -- Optimistic Lock 용
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 테스트용 상품 시드 (10개 상품, 각 재고 1000개)
+INSERT INTO products (name, stock, version, updated_at)
+SELECT
+    'Product ' || g,
+    1000,
+    0,
+    NOW()
+FROM generate_series(1, 10) AS g
+ON CONFLICT DO NOTHING;

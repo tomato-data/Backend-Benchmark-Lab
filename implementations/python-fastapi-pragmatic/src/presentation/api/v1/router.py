@@ -10,6 +10,7 @@ from src.presentation.api.v1 import (
     column_overhead,
     n_plus_one,
     bulk_operations,
+    transactions,
 )
 
 router = APIRouter()
@@ -24,3 +25,4 @@ router.include_router(upload.router)
 router.include_router(column_overhead.router)
 router.include_router(n_plus_one.router)
 router.include_router(bulk_operations.router)
+router.include_router(transactions.router)
