@@ -13,6 +13,7 @@ from src.presentation.api.v1 import (
     transactions,
     caching,
 )
+from src.presentation.api.v1.auth import router as auth_router
 
 router = APIRouter()
 
@@ -28,3 +29,4 @@ router.include_router(n_plus_one.router)
 router.include_router(bulk_operations.router)
 router.include_router(transactions.router)
 router.include_router(caching.router)
+router.include_router(auth_router)
