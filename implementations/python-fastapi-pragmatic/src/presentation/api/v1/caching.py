@@ -119,3 +119,14 @@ async def flush_cache(redis: Redis = Depends(get_redis)):
     """캐시 전체 삭제"""
     await redis.flushdb()
     return {"message": "Cache flushed"}
+
+
+@router.delete("/users/{user_id}")
+async def delete_user_cache(
+    user_id: int,
+    redis: Redis = Depends(get_redis),
+):
+    """특정 사용자 캐시 삭제"""
+    cache_key = f"user:{user_id}"
+    deleted = await redis.delete(cache_key)
+    return {"deleted": cache_key, "success": deleted > 0}
