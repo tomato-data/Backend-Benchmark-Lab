@@ -320,22 +320,37 @@ N+1 문제와 로딩 전략별 성능 비교
 
 ---
 
-## Phase 7: 실제 서비스 패턴 (real-world) ⏳ 예정
+## Phase 7: 실제 서비스 패턴 (real-world) 🔄 진행 중
 
 > 대상: 모든 프레임워크 (아키텍처 차이가 드러나는 시나리오)
 
-| #    | 시나리오        | 설명                             | 상태 |
-| ---- | --------------- | -------------------------------- | ---- |
-| 17-a | auth-none       | 인증 없음 (기준선)               | ⏳   |
-| 17-b | auth-jwt        | JWT Stateless 인증               | ⏳   |
-| 17-c | auth-session    | Session Store Stateful 인증      | ⏳   |
-| 18   | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | ⏳   |
-| 19   | search          | 텍스트 검색 (LIKE vs Full-text)  | ⏳   |
-| 20   | real-world-flow | 인증→조회→수정→응답 E2E          | ⏳   |
+| #    | 시나리오        | 설명                             | 상태    |
+| ---- | --------------- | -------------------------------- | ------- |
+| 17-a | auth-none       | 인증 없음 (기준선)               | ✅ 완료 |
+| 17-b | auth-jwt        | JWT Stateless 인증               | ✅ 완료 |
+| 17-c | auth-session    | Session Store Stateful 인증      | ✅ 완료 |
+| 18   | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | ⏳      |
+| 19   | search          | 텍스트 검색 (LIKE vs Full-text)  | ⏳      |
+| 20   | real-world-flow | 인증→조회→수정→응답 E2E          | ⏳      |
 
-### 17. 인증 방식 비교 (Auth Benchmark)
+### 17. 인증 방식 비교 (Auth Benchmark) ✅ 완료
 
 인증 오버헤드 및 방식별 특성 비교
+
+#### 벤치마크 결과 (2026-01-17)
+
+| 시나리오 | Median | P95 | Throughput | vs No Auth |
+|----------|--------|-----|------------|------------|
+| **17-a: No Auth** | 0.92ms | 1.48ms | 9,532 req/s | 기준선 |
+| **17-b: JWT** | 4.98ms | 22.35ms | 1,283 req/s | **7.4배 느림** |
+| **17-c: Session** | 4.75ms | 17.39ms | 1,464 req/s | **6.5배 느림** |
+
+#### 핵심 인사이트
+
+- **Session이 JWT보다 14% 빠름** (예상과 반대)
+- JWT 서명 검증(CPU 바운드)이 Redis 조회(I/O 바운드)보다 Python에서 비효율적
+- 인증 추가 시 처리량 **6.5~7.4배 감소**
+- 보안 요구사항에 따라 선택, 성능은 Session이 우위
 
 #### 인증 방식 개요
 
@@ -353,21 +368,7 @@ N+1 문제와 로딩 전략별 성능 비교
 | **즉시 로그아웃** | ❌ 토큰 만료까지 유효 | ✅ 즉시 세션 삭제 가능 |
 | **다중 로그인 제어** | ❌ 불가 | ✅ 세션 수 제한 가능 |
 | **이상 탐지** | ❌ 서버에 기록 없음 | ✅ 접속 기록으로 탐지 가능 |
-| **서버 부하** | ✅ 낮음 (CPU만) | ⚠️ Redis 조회 필요 |
-
-#### 측정 포인트
-
-- **17-a (No Auth)**: 인증 없이 보호된 리소스 접근 (기준선)
-- **17-b (JWT)**: 토큰 생성 + 검증 오버헤드
-- **17-c (Session)**: Redis 조회 오버헤드
-
-#### 예상 결과
-
-| 시나리오 | 예상 오버헤드 | 이유 |
-|----------|--------------|------|
-| 17-a No Auth | 0ms | 기준선 |
-| 17-b JWT | +1~3ms | 서명 검증 (CPU) |
-| 17-c Session | +2~5ms | Redis 조회 (네트워크) |
+| **서버 부하** | ⚠️ CPU (서명 검증) | ✅ 낮음 (Redis 조회) |
 
 ---
 
@@ -454,6 +455,7 @@ N+1 문제와 로딩 전략별 성능 비교
 | `docs/19`             | DB Bulk Operations (INSERT/UPDATE) |
 | `docs/20`             | DB Transactions (락 경합)          |
 | `docs/21`             | Caching (Redis Hit/Miss)           |
+| `docs/22`             | Auth (JWT vs Session)              |
 | `docs/99`             | 벤치마크 결과 비교표               |
 | `docs/DISCOVERIES.md` | 교훈 및 인사이트                   |
 
