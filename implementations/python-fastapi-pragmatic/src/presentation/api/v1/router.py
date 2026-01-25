@@ -12,6 +12,7 @@ from src.presentation.api.v1 import (
     bulk_operations,
     transactions,
     caching,
+    aggregation,
 )
 from src.presentation.api.v1.auth import router as auth_router
 
@@ -29,4 +30,5 @@ router.include_router(n_plus_one.router)
 router.include_router(bulk_operations.router)
 router.include_router(transactions.router)
 router.include_router(caching.router)
+router.include_router(aggregation.router)
 router.include_router(auth_router)
