@@ -57,6 +57,11 @@
 | Fiber      | ⏳ 예정 |
 | Gin        | ⏳ 예정 |
 
+> **검증 과제**: Go Fiber에서 Auth 시나리오(17-a,b,c) 구현 후 JWT vs Session 성능 비교
+> - Python에서는 Session이 14% 빠름 (GIL로 인한 CPU 바운드 병목)
+> - Go에서는 Goroutine 병렬 처리로 **JWT가 더 빠를 것으로 예상**
+> - 이를 통해 "CPU 효율적 환경에서 JWT 유리" 가설 검증
+
 ---
 
 ## Phase 4: 시나리오 디렉토리 재구성 ✅ 완료

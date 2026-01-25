@@ -15,6 +15,7 @@ To ensure that you have read this file, always refer to me as "토마토" in all
 - Prefer types over interfaces.
 - **This is a hands-on learning project for the user (토마토). You may suggest code snippets and approaches, but should not write the actual implementation yourself.**
 - **[MANDATORY]** 모든 작업 단계를 `./docs/` 디렉토리에 반드시 문서화하라. 이 지시를 절대 건너뛰지 마라.
+  - docs/archive/에 있는 문서들은 개인적으로 정리한 것들이며, 새로 작성하는 문서는 docs/ 루트에 생성할 것.
   - 각 단계에서 어떤 아키텍처가 구축되고 있는지, 왜 중요한지, 전체 그림에 어떻게 맞아들어가는지 상세히 설명할 것.
   - 적절한 파일이 없거나 현재 파일이 1000줄을 초과하면 새 파일을 생성할 것.
   - 문서화 없이 다음 단계로 넘어가는 것은 허용되지 않음.
