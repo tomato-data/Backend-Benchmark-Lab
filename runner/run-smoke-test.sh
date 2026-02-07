@@ -3,7 +3,7 @@
 # Smoke Test: 모든 엔드포인트가 정상 동작하는지 빠르게 확인
 # Usage: ./run-smoke-test.sh [BASE_URL]
 
-BASE_URL="${1:-http://localhost:8000/api/v1}"
+BASE_URL="${1:-http://localhost:8000/}"
 
 echo "=========================================="
 echo "  Smoke Test - Endpoint Health Check"
