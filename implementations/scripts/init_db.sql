@@ -84,6 +84,10 @@ CREATE TABLE IF NOT EXISTS users_wide (
     preferences JSONB DEFAULT '{}'::jsonb
 );
 
+-- Aggregation 시나리오(18)용 인덱스
+CREATE INDEX IF NOT EXISTS idx_users_wide_country ON users_wide(country);
+CREATE INDEX IF NOT EXISTS idx_users_wide_status ON users_wide(status);
+
 -- 3. Extra Wide (50개 컬럼)
 CREATE TABLE IF NOT EXISTS users_extra_wide (
     id SERIAL PRIMARY KEY,
