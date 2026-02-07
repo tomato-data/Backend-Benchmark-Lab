@@ -19,8 +19,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+**/python-*/lib/
+**/python-*/lib64/
 parts/
 sdist/
 var/
@@ -61,7 +61,7 @@ cover/
 *.pot
 
 # Django stuff:
-*.log
+**/python-*/*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -213,3 +213,16 @@ __marimo__/
 
 # Prisma
 **/generated/prisma/
+
+# Ruby / Rails
+**/ruby-rails/log/
+**/ruby-rails/tmp/
+**/ruby-rails/storage/
+**/ruby-rails/config/*.key
+**/ruby-rails/config/credentials.yml.enc
+**/ruby-rails/config/master.key
+**/ruby-rails/.bundle/
+**/ruby-rails/vendor/bundle/
+**/ruby-rails/.github/
+**/ruby-rails/.kamal/
+**/ruby-rails/config/deploy.yml
