@@ -57,7 +57,8 @@ benchmark-lab/
 │   ├── typescript-express/
 │   ├── typescript-fastify/
 │   ├── typescript-nestjs/
-│   └── go-fiber/
+│   ├── go-fiber/
+│   └── ruby-rails/
 │
 ├── scenarios/                    # 벤치마크 시나리오 (k6 스크립트)
 │   ├── 01-lightweight.js         # 경량 API (Hello World)
@@ -123,6 +124,7 @@ benchmark-lab/
 | typescript-fastify | TypeScript | Fastify    | Node.js  | 성능 중심       |
 | typescript-nestjs  | TypeScript | NestJS     | Node.js  | 엔터프라이즈    |
 | go-fiber           | Go         | Fiber      | -        | 성능 베이스라인 |
+| ruby-rails         | Ruby       | Rails      | Puma     | Convention over Configuration |
 
 ### 서버 구성 실험 (Python)
 

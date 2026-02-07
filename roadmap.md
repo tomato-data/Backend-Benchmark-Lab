@@ -50,6 +50,23 @@
 | Fastify    | -         | ⏳ 예정 | -        |
 | NestJS     | -         | ⏳ 예정 | -        |
 
+### Ruby ⏳ 예정
+
+| 프레임워크 | 아키텍처 | 상태    | 벤치마크 |
+| ---------- | -------- | ------- | -------- |
+| Rails      | -        | ⏳ 예정 | -        |
+
+> **벤치마크 가치**:
+> - **4번째 언어** 추가 (Python, TypeScript, Go, Ruby)
+> - **Convention over Configuration** 패러다임 — 현재 프로젝트의 명시적 설정 프레임워크들과 대비
+> - **ActiveRecord** vs SQLAlchemy vs Prisma — 완전히 다른 ORM 패턴 비교
+> - **Puma 멀티스레드** — Ruby는 GIL이 없으므로 Python과 동시성 특성이 다름
+>
+> **검증 과제**: Auth 시나리오(17-a,b,c)에서 JWT vs Session 비교
+> - Python에서는 Session이 14% 빠름 (GIL로 인한 CPU 바운드 병목)
+> - Ruby는 GIL이 없으므로 **JWT가 Python보다 상대적으로 유리할 것으로 예상**
+> - Go와 함께 "CPU 효율적 환경에서 JWT 유리" 가설 검증 가능
+
 ### Go ⏳ 예정
 
 | 프레임워크 | 상태    |
@@ -329,14 +346,14 @@ N+1 문제와 로딩 전략별 성능 비교
 
 > 대상: 모든 프레임워크 (아키텍처 차이가 드러나는 시나리오)
 
-| #    | 시나리오        | 설명                             | 상태    |
-| ---- | --------------- | -------------------------------- | ------- |
-| 17-a | auth-none       | 인증 없음 (기준선)               | ✅ 완료 |
-| 17-b | auth-jwt        | JWT Stateless 인증               | ✅ 완료 |
-| 17-c | auth-session    | Session Store Stateful 인증      | ✅ 완료 |
-| 18   | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | ⏳      |
-| 19   | search          | 텍스트 검색 (LIKE vs Full-text)  | ⏳      |
-| 20   | real-world-flow | 인증→조회→수정→응답 E2E          | ⏳      |
+| #    | 시나리오        | 설명                             | 상태       |
+| ---- | --------------- | -------------------------------- | ---------- |
+| 17-a | auth-none       | 인증 없음 (기준선)               | ✅ 완료    |
+| 17-b | auth-jwt        | JWT Stateless 인증               | ✅ 완료    |
+| 17-c | auth-session    | Session Store Stateful 인증      | ✅ 완료    |
+| 18   | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | 🔄 진행 중 |
+| 19   | search          | 텍스트 검색 (LIKE vs Full-text)  | ⏳         |
+| 20   | real-world-flow | 인증→조회→수정→응답 E2E          | ⏳         |
 
 ### 17. 인증 방식 비교 (Auth Benchmark) ✅ 완료
 
@@ -374,6 +391,61 @@ N+1 문제와 로딩 전략별 성능 비교
 | **다중 로그인 제어** | ❌ 불가 | ✅ 세션 수 제한 가능 |
 | **이상 탐지** | ❌ 서버에 기록 없음 | ✅ 접속 기록으로 탐지 가능 |
 | **서버 부하** | ⚠️ CPU (서명 검증) | ✅ 낮음 (Redis 조회) |
+
+### 18. 집계 쿼리 (Aggregation) 🔄 진행 중
+
+ORM vs Raw SQL 집계 쿼리 성능 비교
+
+#### 구현 완료 (2026-01-25)
+
+| 작업 | 상태 |
+| --- | --- |
+| Pydantic 스키마 (`aggregation.py`) | ✅ 완료 |
+| 라우터 구현 (6개 엔드포인트) | ✅ 완료 |
+| k6 시나리오 (`18-aggregation.js`) | ✅ 완료 |
+
+#### 엔드포인트
+
+| 엔드포인트 | 설명 |
+|-----------|------|
+| `GET /aggregation/count/orm` | COUNT 3종 비교 (ORM) |
+| `GET /aggregation/count/raw` | COUNT 3종 비교 (Raw SQL) |
+| `GET /aggregation/stats/country/orm` | 국가별 통계 GROUP BY (ORM) |
+| `GET /aggregation/stats/country/raw` | 국가별 통계 GROUP BY (Raw SQL) |
+| `GET /aggregation/stats/author/orm` | 작가별 통계 JOIN + GROUP BY (ORM) |
+| `GET /aggregation/stats/author/raw` | 작가별 통계 JOIN + GROUP BY (Raw SQL) |
+
+#### 첫 벤치마크 결과 (2026-01-25)
+
+| 시나리오 | p(95) | Threshold | 결과 |
+|---------|-------|-----------|------|
+| Count ORM | 373.87ms | <100ms | ❌ |
+| Count Raw | 299.72ms | <50ms | ❌ |
+| Country ORM | 205.27ms | <200ms | ❌ |
+| Country Raw | 203.06ms | <100ms | ❌ |
+| Author ORM | 109.4ms | <200ms | ✅ |
+| Author Raw | 100.75ms | <100ms | ❌ |
+
+#### 핵심 발견
+
+1. **ORM vs Raw SQL 차이 미미** (1~9%)
+   - 병목은 ORM이 아니라 **DB 쿼리 자체**
+2. **100,000건 COUNT가 JOIN보다 느림** (이상 현상)
+   - `users_wide` 테이블에 **인덱스 없음** 추정
+3. **인덱스 추가 필요**
+   - `country`, `status` 컬럼에 인덱스 추가 후 재벤치마크 필요
+
+#### TODO (다음 작업)
+
+- [ ] `users_wide` 테이블에 인덱스 추가
+  ```sql
+  CREATE INDEX idx_users_wide_country ON users_wide(country);
+  CREATE INDEX idx_users_wide_status ON users_wide(status);
+  ```
+- [ ] 인덱스 추가 후 재벤치마크 (Before/After 비교)
+- [ ] Threshold 현실적으로 조정
+- [ ] 문서화 (`docs/23-aggregation.md`)
+- [ ] 결과 분석 및 인사이트 정리
 
 ---
 
@@ -461,9 +533,10 @@ N+1 문제와 로딩 전략별 성능 비교
 | `docs/20`             | DB Transactions (락 경합)          |
 | `docs/21`             | Caching (Redis Hit/Miss)           |
 | `docs/22`             | Auth (JWT vs Session)              |
+| `docs/23`             | Aggregation (집계 쿼리) - 작성 예정 |
 | `docs/99`             | 벤치마크 결과 비교표               |
 | `docs/DISCOVERIES.md` | 교훈 및 인사이트                   |
 
 ---
 
-_Last updated: 2026-01-17_
+_Last updated: 2026-02-07_
