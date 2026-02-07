@@ -36,11 +36,7 @@ docs/DISCOVERIES.md contains useful lessons learned and discoveries made during 
 
 **CRUCIALLY IMPORTANT**: Whenever you finish a task you must perform the following in order:
 
-- Run `pnpm run format` to ensure code is properly formatted.
-- Run `pnpm run lint` to check for any linting errors. If you find any that are related to your changes, fix them before moving on to the next task.
-- Run `pnpm run type-check` to check for any TypeScript type errors. If you find any, fix them before moving on to the next task.
-
-below information is the structure of the project
+- To be updated
 
 ## 1. 프로젝트 구조
 
@@ -115,15 +111,15 @@ benchmark-lab/
 
 ### 언어/프레임워크
 
-| 구현체             | 언어       | 프레임워크 | 서버     | 비고            |
-| ------------------ | ---------- | ---------- | -------- | --------------- |
-| python-fastapi     | Python     | FastAPI    | Uvicorn  | 비동기 ASGI     |
-| python-django      | Python     | Django     | Gunicorn | 동기 WSGI       |
-| python-flask       | Python     | Flask      | Gunicorn | 동기 WSGI       |
-| typescript-express | TypeScript | Express    | Node.js  | 가장 보편적     |
-| typescript-fastify | TypeScript | Fastify    | Node.js  | 성능 중심       |
-| typescript-nestjs  | TypeScript | NestJS     | Node.js  | 엔터프라이즈    |
-| go-fiber           | Go         | Fiber      | -        | 성능 베이스라인 |
+| 구현체             | 언어       | 프레임워크 | 서버     | 비고                          |
+| ------------------ | ---------- | ---------- | -------- | ----------------------------- |
+| python-fastapi     | Python     | FastAPI    | Uvicorn  | 비동기 ASGI                   |
+| python-django      | Python     | Django     | Gunicorn | 동기 WSGI                     |
+| python-flask       | Python     | Flask      | Gunicorn | 동기 WSGI                     |
+| typescript-express | TypeScript | Express    | Node.js  | 가장 보편적                   |
+| typescript-fastify | TypeScript | Fastify    | Node.js  | 성능 중심                     |
+| typescript-nestjs  | TypeScript | NestJS     | Node.js  | 엔터프라이즈                  |
+| go-fiber           | Go         | Fiber      | -        | 성능 베이스라인               |
 | ruby-rails         | Ruby       | Rails      | Puma     | Convention over Configuration |
 
 ### 서버 구성 실험 (Python)

@@ -50,11 +50,11 @@
 | Fastify    | -         | ⏳ 예정 | -        |
 | NestJS     | -         | ⏳ 예정 | -        |
 
-### Ruby ⏳ 예정
+### Ruby 🔄 진행 중
 
-| 프레임워크 | 아키텍처 | 상태    | 벤치마크 |
-| ---------- | -------- | ------- | -------- |
-| Rails      | -        | ⏳ 예정 | -        |
+| 프레임워크 | 아키텍처 | 상태      | 벤치마크 |
+| ---------- | -------- | --------- | -------- |
+| Rails      | API-only | 🔄 진행 중 | ⏳ 예정  |
 
 > **벤치마크 가치**:
 > - **4번째 언어** 추가 (Python, TypeScript, Go, Ruby)
@@ -354,6 +354,7 @@ N+1 문제와 로딩 전략별 성능 비교
 | 18   | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | ✅ 완료    |
 | 19   | search          | 텍스트 검색 (LIKE vs Full-text)  | ⏳         |
 | 20   | real-world-flow | 인증→조회→수정→응답 E2E          | ⏳         |
+| 21   | solid-vs-redis  | Rails Solid Cache vs Redis 캐싱  | ⏳         |
 
 ### 17. 인증 방식 비교 (Auth Benchmark) ✅ 완료
 
@@ -444,14 +445,29 @@ ORM vs Raw SQL 집계 쿼리 성능 비교
 - [x] 결과 분석 및 인사이트 정리
 - [x] `docs/99-benchmark-results.md`에 결과 기록
 
+### 21. Rails Solid Trio vs Redis ⏳ 예정
+
+> Rails 8의 Solid Cache/Queue/Cable을 기존 Redis 인프라와 비교.
+> **전제**: Ruby Rails basic(01-08) 구현 완료 후 진행.
+
+| 비교 대상 | 설명 | 상태 |
+|-----------|------|------|
+| Solid Cache vs Redis | 캐싱 시나리오(14-16) 재실행하여 DB 기반 캐시 vs 인메모리 캐시 비교 | ⏳ 예정 |
+| Solid Queue vs Sidekiq | 비동기 작업 큐 성능 비교 (새 시나리오 필요) | ⏳ 예정 |
+
+**검증 과제**:
+- DHH 주장: "NVMe SSD + DB = Redis에 비해 인프라 복잡도 감소, 성능 충분"
+- 실측으로 레이턴시 차이, 처리량 차이 검증
+- 참고 문서: `docs/24-ruby-rails.md` Phase 7
+
 ---
 
 ## Phase 8: 스트레스 테스트 (stress) ⏳ 예정
 
 | #   | 시나리오      | 설명                                 | 상태 |
 | --- | ------------- | ------------------------------------ | ---- |
-| 21  | spike-traffic | 트래픽 급증 (10→100→10 VUs)          | ⏳   |
-| 22  | long-running  | 장시간 부하 (5분+), 메모리 누수 탐지 | ⏳   |
+| 22  | spike-traffic | 트래픽 급증 (10→100→10 VUs)          | ⏳   |
+| 23  | long-running  | 장시간 부하 (5분+), 메모리 누수 탐지 | ⏳   |
 
 ---
 
@@ -461,8 +477,8 @@ ORM vs Raw SQL 집계 쿼리 성능 비교
 
 | 시나리오      | 설명                   |
 | ------------- | ---------------------- |
-| 23-mixed-cold | 서버 재시작 후 첫 실행 |
-| 23-mixed-warm | 동일 요청 반복 후 실행 |
+| 24-mixed-cold | 서버 재시작 후 첫 실행 |
+| 24-mixed-warm | 동일 요청 반복 후 실행 |
 
 **측정 포인트**:
 
@@ -531,6 +547,7 @@ ORM vs Raw SQL 집계 쿼리 성능 비교
 | `docs/21`             | Caching (Redis Hit/Miss)           |
 | `docs/22`             | Auth (JWT vs Session)              |
 | `docs/23`             | Aggregation (집계 쿼리) - 작성 예정 |
+| `docs/24`             | Ruby Rails 구현 가이드              |
 | `docs/99`             | 벤치마크 결과 비교표               |
 | `docs/DISCOVERIES.md` | 교훈 및 인사이트                   |
 
