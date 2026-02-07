@@ -342,7 +342,7 @@ N+1 문제와 로딩 전략별 성능 비교
 
 ---
 
-## Phase 7: 실제 서비스 패턴 (real-world) 🔄 진행 중
+## Phase 7: 실제 서비스 패턴 (real-world) 🔄 진행 중 (18 완료)
 
 > 대상: 모든 프레임워크 (아키텍처 차이가 드러나는 시나리오)
 
@@ -351,7 +351,7 @@ N+1 문제와 로딩 전략별 성능 비교
 | 17-a | auth-none       | 인증 없음 (기준선)               | ✅ 완료    |
 | 17-b | auth-jwt        | JWT Stateless 인증               | ✅ 완료    |
 | 17-c | auth-session    | Session Store Stateful 인증      | ✅ 완료    |
-| 18   | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | 🔄 진행 중 |
+| 18   | aggregation     | 집계 쿼리 (COUNT, SUM, GROUP BY) | ✅ 완료    |
 | 19   | search          | 텍스트 검색 (LIKE vs Full-text)  | ⏳         |
 | 20   | real-world-flow | 인증→조회→수정→응답 E2E          | ⏳         |
 
@@ -392,7 +392,7 @@ N+1 문제와 로딩 전략별 성능 비교
 | **이상 탐지** | ❌ 서버에 기록 없음 | ✅ 접속 기록으로 탐지 가능 |
 | **서버 부하** | ⚠️ CPU (서명 검증) | ✅ 낮음 (Redis 조회) |
 
-### 18. 집계 쿼리 (Aggregation) 🔄 진행 중
+### 18. 집계 쿼리 (Aggregation) ✅ 완료
 
 ORM vs Raw SQL 집계 쿼리 성능 비교
 
@@ -435,17 +435,14 @@ ORM vs Raw SQL 집계 쿼리 성능 비교
 3. **인덱스 추가 필요**
    - `country`, `status` 컬럼에 인덱스 추가 후 재벤치마크 필요
 
-#### TODO (다음 작업)
+#### 완료 항목
 
-- [ ] `users_wide` 테이블에 인덱스 추가
-  ```sql
-  CREATE INDEX idx_users_wide_country ON users_wide(country);
-  CREATE INDEX idx_users_wide_status ON users_wide(status);
-  ```
-- [ ] 인덱스 추가 후 재벤치마크 (Before/After 비교)
-- [ ] Threshold 현실적으로 조정
-- [ ] 문서화 (`docs/23-aggregation.md`)
-- [ ] 결과 분석 및 인사이트 정리
+- [x] `users_wide` 테이블에 인덱스 추가 (2026-02-07)
+- [x] 인덱스 추가 후 재벤치마크 (Before/After 비교)
+- [x] Threshold 실측 기반으로 조정
+- [x] 문서화 (`docs/23-aggregation.md`)
+- [x] 결과 분석 및 인사이트 정리
+- [x] `docs/99-benchmark-results.md`에 결과 기록
 
 ---
 

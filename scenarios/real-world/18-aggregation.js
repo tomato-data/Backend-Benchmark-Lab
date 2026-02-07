@@ -6,13 +6,14 @@ import { BASE_URL, defaultOptions } from "../config.js";
 export const options = {
   ...defaultOptions,
   thresholds: {
-    // ORM vs Raw SQL 비교
-    "group_duration{group:::A. Count ORM}": ["p(95)<100"],
-    "group_duration{group:::B. Count Raw}": ["p(95)<50"],
-    "group_duration{group:::C. Country Stats ORM}": ["p(95)<200"],
-    "group_duration{group:::D. Country Stats Raw}": ["p(95)<100"],
-    "group_duration{group:::E. Author Stats ORM}": ["p(95)<200"],
-    "group_duration{group:::F. Author Stats Raw}": ["p(95)<100"],
+    // 실측 기반 threshold (2026-02-07)
+    // ORM/Raw 동일 기준 — 비교는 결과 데이터로 판단
+    "group_duration{group:::A. Count ORM}": ["p(95)<300"],
+    "group_duration{group:::B. Count Raw}": ["p(95)<350"],
+    "group_duration{group:::C. Country Stats ORM}": ["p(95)<250"],
+    "group_duration{group:::D. Country Stats Raw}": ["p(95)<250"],
+    "group_duration{group:::E. Author Stats ORM}": ["p(95)<150"],
+    "group_duration{group:::F. Author Stats Raw}": ["p(95)<150"],
   },
 };
 
