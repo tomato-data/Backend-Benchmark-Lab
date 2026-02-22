@@ -150,6 +150,90 @@ services:
           cpus: "2"
           memory: 2G
 
+  # ============================================
+  # Server Config Experiment (Uvicorn vs Gunicorn)
+  # 실행: CPU_LIMIT=1 docker compose --profile server-uvicorn up -d
+  # ============================================
+  server-uvicorn:
+    build: ./python-server-config
+    profiles: ["server-uvicorn"]
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
+      SERVER_TYPE: uvicorn
+      WORKER_COUNT: 1
+      CPU_LIMIT: "${CPU_LIMIT:-1}"
+    command:
+      [
+        "uvicorn",
+        "src.main:app",
+        "--host", "0.0.0.0",
+        "--port", "8000",
+      ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "${CPU_LIMIT:-1}"
+          memory: 2G
+
+  server-gunicorn-2w:
+    build: ./python-server-config
+    profiles: ["server-gunicorn-2w"]
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
+      SERVER_TYPE: gunicorn+uvicorn
+      WORKER_COUNT: 2
+      CPU_LIMIT: "${CPU_LIMIT:-1}"
+    command:
+      [
+        "gunicorn",
+        "src.main:app",
+        "-w", "2",
+        "-k", "uvicorn.workers.UvicornWorker",
+        "--bind", "0.0.0.0:8000",
+      ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "${CPU_LIMIT:-1}"
+          memory: 2G
+
+  server-gunicorn-4w:
+    build: ./python-server-config
+    profiles: ["server-gunicorn-4w"]
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://benchmark:benchmark@postgres:5432/benchmark
+      SERVER_TYPE: gunicorn+uvicorn
+      WORKER_COUNT: 4
+      CPU_LIMIT: "${CPU_LIMIT:-1}"
+    command:
+      [
+        "gunicorn",
+        "src.main:app",
+        "-w", "4",
+        "-k", "uvicorn.workers.UvicornWorker",
+        "--bind", "0.0.0.0:8000",
+      ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "${CPU_LIMIT:-1}"
+          memory: 2G
+
 volumes:
   postgres_data:
   redis_data:
