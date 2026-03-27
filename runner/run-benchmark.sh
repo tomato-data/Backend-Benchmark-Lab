@@ -49,6 +49,7 @@ get_profile() {
     python-fastapi-pragmatic) echo "fastapi-pragmatic" ;;
     python-fastapi-strict) echo "fastapi-strict" ;;
     typescript-express) echo "express" ;;
+    ruby-rails) echo "rails" ;;
     *) echo "" ;;
   esac
 }
@@ -62,6 +63,7 @@ usage() {
   echo "  python-fastapi-pragmatic"
   echo "  python-fastapi-strict"
   echo "  typescript-express"
+  echo "  ruby-rails"
   echo ""
   echo "Scenario:"
   echo "  03    - Run only scenario 03"

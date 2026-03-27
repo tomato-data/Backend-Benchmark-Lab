@@ -6,7 +6,7 @@
 
 ## Highlights
 
-- **4 languages, 6 frameworks** on identical API specs — apples-to-apples comparison
+- **4 languages, 5 frameworks** on identical API specs — apples-to-apples comparison
 - **26 real-world scenarios** (not "Hello World"): N+1, caching, auth, transactions, server config
 - **105 server-config runs** proving deployment tuning beats framework choice
 - Every number averaged over **10 k6 runs** in resource-constrained Docker containers
@@ -74,7 +74,7 @@ Backend-Benchmark-Lab/
 
 | Item | Value |
 |------|-------|
-| Host | MacBook Apple Silicon |
+| Host | Apple M5 Pro, 18 cores, 48 GB |
 | Container CPU | 2 cores (server), 2 cores (DB) |
 | Container Memory | 2 GB (server), 1 GB (DB) |
 | k6 VUs | 10 |
@@ -93,32 +93,42 @@ Backend-Benchmark-Lab/
 | FastAPI | Strict (Clean Architecture) | ✅ | ✅ |
 | Django | DRF ViewSet | ✅ | ✅ |
 | Express | Pragmatic + Prisma | ✅ | ✅ |
-| Rails 8 | API-only MVC | ✅ | — |
+| Rails 8 | API-only MVC | ✅ | ✅ |
 | Go Fiber | — | — | — |
 
 ---
 
-## Benchmark Results
+## Benchmark Results (2026-03-27)
 
-### Basic: Express vs FastAPI vs Django
+### Full Comparison: 5 Frameworks (RPS)
 
-| Scenario | Express | FastAPI | Django | Winner |
-|---------|---------|---------|--------|--------|
-| 01-lightweight | **17,005** | 11,616 | 1,655 | Express |
-| 03-db-read | **413** | 146 | 252 | Express |
-| 04-db-write | **5,022** | 1,091 | 373 | Express |
-| 05-external-api | 93 | 92 | 19 | Tie (I/O bound) |
-| 08-mixed | **551** | 125 | 92 | Express |
+| Scenario | Express | FastAPI-P | FastAPI-S | Rails | Django |
+|----------|---------|-----------|-----------|-------|--------|
+| 01-lightweight | **20,492** | 14,225 | 13,928 | 3,632 | 2,899 |
+| 02-json-payload | **17,403** | 11,790 | 11,635 | 4,200 | 2,621 |
+| 03-db-read | 498 | 147 | 170 | **1,524** | 288 |
+| 04-db-write | **5,875** | 1,280 | 1,528 | 1,719 | 411 |
+| 05-external-api | 92 | **94** | 93 | 90 | 19 |
+| 06-middleware | **18,771** | 9,799 | 10,455 | 3,519 | 2,560 |
+| 07-file-upload | **10,063** | 6,029 | 6,084 | 3,150 | 2,622 |
+| 08-mixed | 244 | 122 | 133 | **557** | 93 |
 
-> Express dominates in raw throughput (1.5-4.6x vs FastAPI). But at the I/O boundary, all frameworks converge. Real workloads narrow the gap significantly.
+> Express leads in lightweight throughput, but **Rails wins in DB reads (3x over Express) and mixed workloads (2.3x over Express)**. At the I/O boundary (05), all async frameworks converge. Django's synchronous processing is the bottleneck for external API calls.
 
 <!-- TODO: Add benchmark chart images -->
 
+### Rails: The Surprise Performer
+
+- **DB Read #1** — ActiveRecord's efficient SELECT outperforms even Prisma (1,524 vs 498 RPS)
+- **Mixed Workload #1** — Puma's multi-threaded architecture excels at concurrency (557 vs 244 RPS)
+- **Most Stable** — Lowest coefficient of variation in mixed workload (CV 5.8% vs 45%+ for others)
+- Weak in lightweight scenarios (Ruby interpreter overhead)
+
 ### Clean Architecture: Zero Performance Penalty
 
-FastAPI Strict (Clean Architecture) vs Pragmatic: **3-6% faster** across all scenarios, with **+19.6% on DB writes** and dramatically lower standard deviation (2,469 vs 367 on lightweight). Layer separation improves both speed and stability.
+FastAPI Strict (Clean Architecture) vs Pragmatic: **DB writes +19.4% faster**, standard deviation dramatically lower (lightweight: 37 vs 265). Layer separation improves both speed and stability.
 
-### DB & Caching & Auth Highlights
+### DB, Caching & Auth Highlights
 
 - **Cursor pagination** is 1.7x faster than OFFSET at deep pages (index seek vs full scan)
 - **Eager loading (JOIN)** solves N+1 with 4.1x speedup (21 queries down to 1)
@@ -129,31 +139,51 @@ FastAPI Strict (Clean Architecture) vs Pragmatic: **3-6% faster** across all sce
 
 <!-- TODO: Add benchmark chart images -->
 
-### Server Config: Deployment Recommendation
+### Server Config: Uvicorn vs Gunicorn (2026-03-02)
 
-> 3 hypotheses, 5 rounds, 105 test runs (Uvicorn vs Gunicorn)
+> Same FastAPI app, 3 server configs (Uvicorn / Gunicorn+Uvicorn 2w / 4w), 5 rounds × 35 combinations × 3 runs = **105 total runs**
 
-| vCPU | Recommended Config |
-|------|--------------------|
-| 0.25 - 0.5 | Uvicorn standalone |
-| 1 | Uvicorn or Gunicorn 1 worker |
-| 2+ | Gunicorn (workers = vCPU count) |
+**Hypothesis Validation**
 
-> **Golden rule**: Never set workers > vCPU count. Uvicorn + CPU-bound = 98% collapse. Proper server config yields 1.86x on the same framework.
+| Hypothesis | Content | Result | Key Data |
+|------------|---------|--------|----------|
+| H1 | Single async process wins on I/O-bound | **Rejected** | gunicorn-4w is 3-6% faster, P99 gap 13% |
+| H2 | Multi-process wins on CPU-bound | **Accepted** | gunicorn-2w is **1.86x** faster (GIL bypass) |
+| H3 | Multi-process hurts on low CPU | **Conditional** | I/O: no harm, CPU: **98% collapse** |
+
+**Key Results**
+
+| Round | Workload | CPU | Winner | Key Data |
+|-------|----------|-----|--------|----------|
+| R1 | I/O (sleep) | 1 vCPU | gunicorn-4w | +6% RPS, P99 126→145ms gap at VU=200 |
+| R2 | CPU (fibonacci) | 2 vCPU | gunicorn-2w | **1.86x** RPS, uvicorn P99=60s timeout |
+| R3 | I/O (sleep) | 0.25 vCPU | ~tie | All 3 configs stable, <5% diff |
+| R4 | CPU (fibonacci) | 0.25 vCPU | uvicorn | **3.4x** — gunicorn-4w gets 0.27 RPS |
+| R5 | Mixed (DB+compute) | 1/2 vCPU | depends | 1 vCPU: uvicorn, 2 vCPU: gunicorn-2w (1.7x) |
+
+**Deployment Guide**
+
+| Workload | ≤1 vCPU | 2+ vCPU |
+|----------|---------|---------|
+| **I/O-bound** (API calls, DB) | Uvicorn standalone | Gunicorn + N workers (slight gain) |
+| **CPU-bound** (compute, hashing) | Uvicorn standalone | **Gunicorn + N workers required** (N = vCPU) |
+| **Mixed** (real-world) | Uvicorn standalone | **Gunicorn + N workers required** (N = vCPU) |
+
+**Lessons**: (1) Workers > vCPU = service-level failure on CPU-bound, (2) Single event loop can't utilize additional CPUs — Uvicorn@1vCPU ≈ Uvicorn@2vCPU, (3) I/O-bound needs almost no CPU — 0.25 vCPU ≈ 1 vCPU throughput.
 
 ---
 
 ## Key Insights
 
-1. **"Nx faster" is a half-truth** — FastAPI is 7-9x faster than Django in lightweight, but only 1.4x in mixed workloads. Django is 1.6x faster for DB reads.
+1. **"Nx faster" is a half-truth** — Express is 7x faster than Django in lightweight, but Rails beats everyone in DB reads and mixed workloads.
 2. **The bottleneck is rarely the framework** — Optimization priority: DB queries > Caching > Infra config > Framework choice.
-3. **Clean Architecture has zero performance penalty** — Actually 3-6% faster with much lower variance.
-4. **Server config matters more than framework choice** — 1.86x improvement from proper worker configuration alone.
-5. **Python's GIL reverses JWT vs Session** — Session is 14% faster; CPU-bound JWT verification suffers under the GIL.
-6. **"Fewer queries = faster" is false** — 3 separate ORM queries beat 1 combined Raw SQL by 1.4x (optimizer picks better plans per query).
-7. **Data type choice barely affects performance** — All types within +-7%. Choose based on data modeling, not speed.
+3. **Rails DB performance is surprisingly strong** — ActiveRecord + Puma beats Express (Prisma) 3x in DB reads and 2.3x in mixed workloads.
+4. **Clean Architecture has zero performance penalty** — Actually 15-19% faster on DB operations with much lower variance.
+5. **Server config matters more than framework choice** — 1.86x improvement from proper worker configuration alone.
+6. **Python's GIL reverses JWT vs Session** — Session is 14% faster; CPU-bound JWT verification suffers under the GIL.
+7. **"Fewer queries = faster" is false** — 3 separate ORM queries beat 1 combined Raw SQL by 1.4x (optimizer picks better plans per query).
 8. **Commit count determines 99% of bulk performance** — Individual INSERT (2.98s) vs Raw VALUES (15.91ms) = 187x difference.
-9. **Benchmarks have cold start effects** — First k6 call adds +10ms. Randomize order or add warmup for accuracy.
+9. **Mixed workload = real-world proxy** — Scenario 08 results (Rails #1) best represent actual production traffic patterns.
 
 ---
 
@@ -169,14 +199,16 @@ docker compose --profile fastapi-pragmatic up -d
 docker compose --profile fastapi-strict up -d
 docker compose --profile django up -d
 docker compose --profile express up -d
+docker compose --profile rails up -d
 ```
 
 ### Run benchmarks
 
 ```bash
 cd runner
-./run-benchmark.sh          # All scenarios
-./run-benchmark.sh 05       # Start from scenario 05
+./run-benchmark.sh python-fastapi-pragmatic    # All scenarios for FastAPI
+./run-benchmark.sh typescript-express 05        # Single scenario
+./run-benchmark.sh ruby-rails 03+              # From scenario 03 onwards
 ```
 
 ### Monitoring (optional)
@@ -194,18 +226,17 @@ docker compose up -d
 ### Completed
 
 - [x] Infrastructure (Docker, k6, Prometheus + Grafana)
-- [x] Basic scenarios 01-08 (4 frameworks)
+- [x] Basic scenarios 01-08 (5 frameworks)
 - [x] FastAPI Pragmatic vs Strict architecture comparison
 - [x] DB Advanced 09-13 (Pagination, Column, N+1, Bulk, Transactions)
 - [x] Caching 14-16 (Redis hit/miss)
 - [x] Authentication 17 (JWT vs Session)
 - [x] Aggregation 18 (ORM vs Raw SQL)
 - [x] Server configuration experiment (Uvicorn vs Gunicorn, 105 runs)
-- [x] Ruby Rails 8 implementation
+- [x] Ruby Rails 8 implementation + benchmarks
 
 ### Planned
 
-- [ ] Ruby Rails benchmarks
 - [ ] Go Fiber implementation + JWT vs Session validation
 - [ ] Flask, Fastify, NestJS implementations
 - [ ] Text search (LIKE vs Full-text)
