@@ -2,6 +2,7 @@ docs/
 results/
 .DS_Store
 node_modules/
+CLAUDE.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
