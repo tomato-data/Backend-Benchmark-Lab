@@ -79,6 +79,31 @@
 > - Go에서는 Goroutine 병렬 처리로 **JWT가 더 빠를 것으로 예상**
 > - 이를 통해 "CPU 효율적 환경에서 JWT 유리" 가설 검증
 
+### JVM (Java / Kotlin) ⏳ 예정
+
+> **학습 목적 우선**: 새 언어/런타임 계열 추가. TDD + ODP + Forces-Driven 체화 세션으로 진행.
+>
+> **진행 순서**: Java Spring Boot 먼저 → Kotlin Spring Boot 후속. Java의 장황함(getter/setter/equals 등)을 Force로 체감한 뒤 Kotlin `data class`/null safety가 해결하는 지점을 추출하는 것이 학습 목표.
+
+| 프레임워크          | 언어   | 서버       | 아키텍처            | 상태    | 벤치마크 |
+| ------------------- | ------ | ---------- | ------------------- | ------- | -------- |
+| Spring Boot         | Java   | Tomcat     | Layered (MVC)       | ⏳ 예정 | -        |
+| Spring Boot         | Kotlin | Tomcat     | Layered (MVC)       | ⏳ 예정 | -        |
+| Spring WebFlux      | Kotlin | Netty      | Reactive / Coroutines | ⏳ 예정 (후속) | -        |
+
+> **벤치마크 가치**:
+> - **5번째 언어 계열** 추가 (JVM) — Python, TypeScript/Node, Go, Ruby와 비교
+> - **엔터프라이즈 표준** — 기업 환경에서 가장 널리 쓰이는 스택
+> - **Spring MVC vs WebFlux** — 동일 프레임워크 내 블로킹(Servlet) vs 논블로킹(Reactor) 비교 가능
+> - **Java vs Kotlin on Same Framework** — 같은 Spring Boot인데 언어 차이만으로 성능·코드량 차이 측정
+> - **HikariCP** — JVM 세계의 표준 커넥션 풀, Python/Node 대비 어떻게 다른지
+> - **JIT warmup 효과** — cold start 시나리오에서 극적으로 드러날 것
+>
+> **검증 과제**:
+> - Auth(JWT vs Session): JVM은 멀티스레드 + JIT 최적화로 CPU 바운드 JWT 검증이 Python보다 크게 빠를 것으로 예상 → "CPU 효율적 환경에서 JWT 유리" 가설 강화 검증
+> - MVC(Servlet) vs WebFlux(Reactor): 05-external-api, 14-caching 등 I/O 경계 시나리오에서 어떻게 벌어지는지
+> - 동일 로직, Java vs Kotlin: 컴파일러 차이만으로 벤치마크 수치가 의미 있게 갈리는지 (가설: 거의 차이 없음)
+
 ---
 
 ## Phase 4: 시나리오 디렉토리 재구성 ✅ 완료
