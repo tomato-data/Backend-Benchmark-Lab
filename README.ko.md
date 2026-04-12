@@ -11,7 +11,7 @@
 - **105회 서버 구성 테스트**로 배포 튜닝이 프레임워크 선택보다 중요함을 입증
 - 모든 수치는 리소스 제한된 Docker 컨테이너에서 **k6 10회 반복 평균**
 
-<!-- TODO: Add hero benchmark chart image -->
+![Framework RPS Comparison](assets/charts/01-framework-rps.png)
 
 ---
 
@@ -115,7 +115,7 @@ Backend-Benchmark-Lab/
 
 > Express가 경량 처리량에서 선두이지만, **Rails가 DB 읽기(Express 대비 3배)와 혼합 워크로드(Express 대비 2.3배)에서 1위**. I/O 경계(05)에서는 모든 비동기 프레임워크가 수렴. Django의 동기 처리가 외부 API 호출에서 병목.
 
-<!-- TODO: Add benchmark chart images -->
+![Framework RPS Comparison](assets/charts/01-framework-rps.png)
 
 ### Rails: 예상을 뒤엎은 강자
 
@@ -128,6 +128,8 @@ Backend-Benchmark-Lab/
 
 FastAPI Strict (Clean Architecture) vs Pragmatic: **DB 쓰기 +19.4% 향상**, 표준편차 대폭 감소 (lightweight: 37 vs 265). 레이어 분리가 속도와 안정성 모두를 개선.
 
+![Clean Architecture vs Pragmatic](assets/charts/02-clean-architecture.png)
+
 ### DB, 캐싱, 인증 핵심 결과
 
 - **Cursor 페이지네이션**: 깊은 페이지에서 OFFSET 대비 1.7x 빠름 (인덱스 탐색 vs 전체 스캔)
@@ -137,7 +139,7 @@ FastAPI Strict (Clean Architecture) vs Pragmatic: **DB 쓰기 +19.4% 향상**, �
 - **Redis 캐시 히트**: 10x 처리량 + tail latency 스파이크 제거
 - **Session 인증이 JWT보다 14% 빠름** (Python) — GIL로 인해 CPU 바운드 JWT 검증이 비동기 Redis 조회보다 느림
 
-<!-- TODO: Add benchmark chart images -->
+![Caching Impact](assets/charts/03-caching-impact.png)
 
 ### 서버 구성: Uvicorn vs Gunicorn (2026-03-02)
 
@@ -170,6 +172,8 @@ FastAPI Strict (Clean Architecture) vs Pragmatic: **DB 쓰기 +19.4% 향상**, �
 | **Mixed** (현실적 서비스) | Uvicorn 단독 | **Gunicorn + N워커 필수** (N = vCPU 수) |
 
 **교훈**: (1) workers > vCPU = CPU-bound에서 서비스 장애 수준, (2) 단일 프로세스는 추가 CPU를 활용 불가 — Uvicorn@1vCPU ≈ Uvicorn@2vCPU, (3) I/O-bound에서 CPU는 거의 무관 — 0.25 vCPU ≈ 1 vCPU 처리량.
+
+![Server Config Benchmark](assets/charts/04-server-config.png)
 
 ---
 

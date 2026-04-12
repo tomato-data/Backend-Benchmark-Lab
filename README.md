@@ -11,7 +11,7 @@
 - **105 server-config runs** proving deployment tuning beats framework choice
 - Every number averaged over **10 k6 runs** in resource-constrained Docker containers
 
-<!-- TODO: Add hero benchmark chart image -->
+![Framework RPS Comparison](assets/charts/01-framework-rps.png)
 
 ---
 
@@ -115,7 +115,7 @@ Backend-Benchmark-Lab/
 
 > Express leads in lightweight throughput, but **Rails wins in DB reads (3x over Express) and mixed workloads (2.3x over Express)**. At the I/O boundary (05), all async frameworks converge. Django's synchronous processing is the bottleneck for external API calls.
 
-<!-- TODO: Add benchmark chart images -->
+![Framework RPS Comparison](assets/charts/01-framework-rps.png)
 
 ### Rails: The Surprise Performer
 
@@ -128,6 +128,8 @@ Backend-Benchmark-Lab/
 
 FastAPI Strict (Clean Architecture) vs Pragmatic: **DB writes +19.4% faster**, standard deviation dramatically lower (lightweight: 37 vs 265). Layer separation improves both speed and stability.
 
+![Clean Architecture vs Pragmatic](assets/charts/02-clean-architecture.png)
+
 ### DB, Caching & Auth Highlights
 
 - **Cursor pagination** is 1.7x faster than OFFSET at deep pages (index seek vs full scan)
@@ -137,7 +139,7 @@ FastAPI Strict (Clean Architecture) vs Pragmatic: **DB writes +19.4% faster**, s
 - **Redis cache hit** delivers 10x throughput + eliminates tail latency spikes
 - **Session auth beats JWT by 14%** in Python — GIL makes CPU-bound JWT verification slower than async Redis lookup
 
-<!-- TODO: Add benchmark chart images -->
+![Caching Impact](assets/charts/03-caching-impact.png)
 
 ### Server Config: Uvicorn vs Gunicorn (2026-03-02)
 
@@ -170,6 +172,8 @@ FastAPI Strict (Clean Architecture) vs Pragmatic: **DB writes +19.4% faster**, s
 | **Mixed** (real-world) | Uvicorn standalone | **Gunicorn + N workers required** (N = vCPU) |
 
 **Lessons**: (1) Workers > vCPU = service-level failure on CPU-bound, (2) Single event loop can't utilize additional CPUs — Uvicorn@1vCPU ≈ Uvicorn@2vCPU, (3) I/O-bound needs almost no CPU — 0.25 vCPU ≈ 1 vCPU throughput.
+
+![Server Config Benchmark](assets/charts/04-server-config.png)
 
 ---
 
