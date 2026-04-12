@@ -1,4 +1,3 @@
-docs/
 results/
 .DS_Store
 node_modules/
@@ -230,3 +229,27 @@ __marimo__/
 **/ruby-rails/.github/
 **/ruby-rails/.kamal/
 **/ruby-rails/config/deploy.yml
+
+# Java / Gradle (Spring Boot)
+**/java-spring-boot/.gradle/
+**/java-spring-boot/build/
+**/java-spring-boot/bin/
+**/java-spring-boot/out/
+**/java-spring-boot/*.iml
+**/java-spring-boot/*.iws
+**/java-spring-boot/*.ipr
+**/java-spring-boot/.apt_generated
+**/java-spring-boot/.classpath
+**/java-spring-boot/.factorypath
+**/java-spring-boot/.project
+**/java-spring-boot/.settings/
+**/java-spring-boot/.springBeans
+**/java-spring-boot/.sts4-cache/
+**/java-spring-boot/nbproject/private/
+**/java-spring-boot/nbbuild/
+**/java-spring-boot/nbdist/
+**/java-spring-boot/.nb-gradle/
+
+# IDEs (global)
+.idea/
+.vscode/
