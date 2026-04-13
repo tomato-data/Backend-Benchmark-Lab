@@ -44,9 +44,22 @@ Backend-Benchmark-Lab/
 │   ├── server-config/        #   Server configuration
 │   └── stress/               #   Stress testing
 │
+├── docs/                     # Claude-authored specs (see docs/README.md)
+│   ├── scenarios/            #   NN-{topic}.md — scenario & implementation guides
+│   ├── plans/                #   /tdd-plan outputs
+│   └── benchmark-results.md  #   RPS/latency comparison tables
+│
+├── learnings/                # User-authored notes (see learnings/README.md)
+│   ├── qna/                  #   Per-scenario Q&A
+│   ├── retrospectives/       #   Scenario completion retrospectives
+│   ├── topics/               #   Cross-cutting deep-dives
+│   └── DISCOVERIES.md        #   Findings log (scenario-independent)
+│
 ├── runner/                   # Automation scripts
 └── monitoring/               # Prometheus + Grafana
 ```
+
+> Documentation is split by authorship. `docs/` holds Claude-written specs, plans, and result tables; `learnings/` holds my own Q&A, retrospectives, and cross-cutting deep-dives. See [`docs/README.md`](docs/README.md) and [`learnings/README.md`](learnings/README.md) for the full index.
 
 ---
 

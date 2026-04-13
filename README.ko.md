@@ -44,9 +44,22 @@ Backend-Benchmark-Lab/
 │   ├── server-config/        #   서버 구성 실험
 │   └── stress/               #   스트레스 테스트
 │
+├── docs/                     # Claude가 작성한 스펙 (docs/README.md 참조)
+│   ├── scenarios/            #   NN-{topic}.md — 시나리오·구현 가이드
+│   ├── plans/                #   /tdd-plan 결과물
+│   └── benchmark-results.md  #   RPS/Latency 비교표
+│
+├── learnings/                # 사용자 산출물 (learnings/README.md 참조)
+│   ├── qna/                  #   시나리오별 Q&A
+│   ├── retrospectives/       #   시나리오 완료 회고
+│   ├── topics/               #   크로스커팅 심화 주제
+│   └── DISCOVERIES.md        #   발견 로그 (시나리오 독립)
+│
 ├── runner/                   # 자동화 스크립트
 └── monitoring/               # Prometheus + Grafana
 ```
+
+> 문서는 **작성 주체**에 따라 분리되어 있습니다. `docs/`는 Claude가 쓴 스펙·계획·결과표, `learnings/`는 제가 직접 쓴 Q&A·회고·크로스커팅 심화입니다. 전체 인덱스는 [`docs/README.md`](docs/README.md)와 [`learnings/README.md`](learnings/README.md)를 참조하세요.
 
 ---
 
