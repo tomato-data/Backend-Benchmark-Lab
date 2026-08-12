@@ -1,107 +1,107 @@
 # Backend Benchmark Lab
 
-[![Korean](https://img.shields.io/badge/lang-Korean-blue)](README.ko.md)
+[![English](https://img.shields.io/badge/lang-English-blue)](README.en.md)
 
-> **"Same Logic, Different Implementations"** — An empirical benchmark lab for backend frameworks
+> **"동일 로직, 다른 구현"** — 백엔드 프레임워크 성능을 실증적으로 검증하는 벤치마크 실험실
 
-## Highlights
+## 하이라이트
 
-- **4 languages, 5 frameworks** on identical API specs — apples-to-apples comparison
-- **26 real-world scenarios** (not "Hello World"): N+1, caching, auth, transactions, server config
-- **105 server-config runs** proving deployment tuning beats framework choice
-- Every number averaged over **10 k6 runs** in resource-constrained Docker containers
+- **4개 언어, 5개 프레임워크**를 동일 API 스펙 위에서 공정 비교
+- **26개 실전 시나리오** ("Hello World"가 아닌): N+1, 캐싱, 인증, 트랜잭션, 서버 구성
+- **105회 서버 구성 테스트**로 배포 튜닝이 프레임워크 선택보다 중요함을 입증
+- 모든 수치는 리소스 제한된 Docker 컨테이너에서 **k6 10회 반복 평균**
 
 ![Framework RPS Comparison](assets/charts/01-framework-rps.png)
 
 ---
 
-## Why I Built This
+## 왜 만들었나
 
-I was using FastAPI at work but couldn't explain **why** it was the right choice. "It's fast" is everywhere, but how fast, under what conditions, and how does it structurally differ from alternatives?
+회사에서 FastAPI를 쓰고 있었지만, **왜 이 프레임워크를 쓰는지** 명확히 설명할 수 없었습니다. "빠르다"는 말은 많은데, 어떤 상황에서 얼마나 빠른지, 다른 프레임워크와 구조적으로 어떻게 다른지 직접 검증하고 싶었습니다.
 
-Instead of trusting synthetic benchmarks, I built real-world scenarios to **make data-driven technology decisions**.
+단순한 합성 벤치마크 대신 실전 시나리오를 구축해 **데이터 기반으로 기술 선택의 근거를 확보**하는 것이 목표입니다.
 
 ---
 
-## Project Structure
+## 프로젝트 구조
 
 ```
 Backend-Benchmark-Lab/
-├── implementations/          # Framework implementations (identical APIs)
-│   ├── python-fastapi-pragmatic/    # FastAPI — Pragmatic architecture
+├── implementations/          # 프레임워크별 구현체 (동일 API)
+│   ├── python-fastapi-pragmatic/    # FastAPI — 실용적 아키텍처
 │   ├── python-fastapi-strict/       # FastAPI — Clean Architecture
 │   ├── python-django/               # Django — DRF ViewSet
-│   ├── python-server-config/        # Server config experiments
+│   ├── python-server-config/        # 서버 구성 실험
 │   ├── typescript-express/          # Express.js + Prisma
 │   └── ruby-rails/                  # Rails 8 API-only + ActiveRecord
 │
-├── scenarios/                # k6 benchmark scripts (26 scenarios)
-│   ├── basic/                #   01-08: Framework comparison
-│   ├── db-advanced/          #   09-13: DB optimization
-│   ├── caching/              #   14-16: Redis caching
+├── scenarios/                # k6 벤치마크 시나리오 (26개)
+│   ├── basic/                #   01-08: 프레임워크 비교
+│   ├── db-advanced/          #   09-13: DB 최적화
+│   ├── caching/              #   14-16: Redis 캐싱
 │   ├── auth/                 #   17: JWT vs Session
-│   ├── real-world/           #   18+: Aggregation, search
-│   ├── server-config/        #   Server configuration
-│   └── stress/               #   Stress testing
+│   ├── real-world/           #   18+: 집계, 검색 등
+│   ├── server-config/        #   서버 구성 실험
+│   └── stress/               #   스트레스 테스트
 │
-├── docs/                     # Claude-authored specs (see docs/README.md)
-│   ├── scenarios/            #   NN-{topic}.md — scenario & implementation guides
-│   ├── plans/                #   /tdd-plan outputs
-│   └── benchmark-results.md  #   RPS/latency comparison tables
+├── docs/                     # Claude가 작성한 스펙 (docs/README.md 참조)
+│   ├── scenarios/            #   NN-{topic}.md — 시나리오·구현 가이드
+│   ├── plans/                #   /tdd-plan 결과물
+│   └── benchmark-results.md  #   RPS/Latency 비교표
 │
-├── learnings/                # User-authored notes (see learnings/README.md)
-│   ├── qna/                  #   Per-scenario Q&A
-│   ├── retrospectives/       #   Scenario completion retrospectives
-│   ├── topics/               #   Cross-cutting deep-dives
-│   └── DISCOVERIES.md        #   Findings log (scenario-independent)
+├── learnings/                # 사용자 산출물 (learnings/README.md 참조)
+│   ├── qna/                  #   시나리오별 Q&A
+│   ├── retrospectives/       #   시나리오 완료 회고
+│   ├── topics/               #   크로스커팅 심화 주제
+│   └── DISCOVERIES.md        #   발견 로그 (시나리오 독립)
 │
-├── runner/                   # Automation scripts
+├── runner/                   # 자동화 스크립트
 └── monitoring/               # Prometheus + Grafana
 ```
 
-> Documentation is split by authorship. `docs/` holds Claude-written specs, plans, and result tables; `learnings/` holds my own Q&A, retrospectives, and cross-cutting deep-dives. See [`docs/README.md`](docs/README.md) and [`learnings/README.md`](learnings/README.md) for the full index.
+> 문서는 **작성 주체**에 따라 분리되어 있습니다. `docs/`는 Claude가 쓴 스펙·계획·결과표, `learnings/`는 제가 직접 쓴 Q&A·회고·크로스커팅 심화입니다. 전체 인덱스는 [`docs/README.md`](docs/README.md)와 [`learnings/README.md`](learnings/README.md)를 참조하세요.
 
 ---
 
-## Tech Stack
+## 기술 스택
 
-| Area | Technology |
-|------|-----------|
-| **Benchmarking** | k6 (Grafana), 10 VUs, 30s, 10-run average |
-| **Containers** | Docker Compose (profile-based switching) |
-| **Database** | PostgreSQL 16 |
-| **Cache** | Redis |
-| **Monitoring** | Prometheus + cAdvisor + Grafana |
-| **API Spec** | OpenAPI (Single Source of Truth) |
+| 영역 | 기술 |
+|------|------|
+| **벤치마크** | k6 (Grafana), 10 VUs, 30s, 10회 반복 평균 |
+| **컨테이너** | Docker Compose (프로필 기반 전환) |
+| **데이터베이스** | PostgreSQL 16 |
+| **캐시** | Redis |
+| **모니터링** | Prometheus + cAdvisor + Grafana |
+| **API 스펙** | OpenAPI (Single Source of Truth) |
 
-| Implementation | Language | Framework | Server | ORM | Validation |
-|---------------|----------|-----------|--------|-----|-----------|
+| 구현체 | 언어 | 프레임워크 | 서버 | ORM | 검증 |
+|--------|------|-----------|------|-----|------|
 | python-fastapi | Python 3.12 | FastAPI | Uvicorn | SQLAlchemy (async) | Pydantic |
 | python-django | Python 3.12 | Django 5 | Gunicorn | Django ORM | DRF Serializer |
-| typescript-express | TypeScript | Express | Node.js 22 | Prisma | Zod (optional) |
+| typescript-express | TypeScript | Express | Node.js 22 | Prisma | Zod (선택적) |
 | ruby-rails | Ruby 3.3+ | Rails 8 | Puma | ActiveRecord | — |
 
 ---
 
-## Test Environment
+## 실험 환경
 
-| Item | Value |
-|------|-------|
-| Host | Apple M5 Pro, 18 cores, 48 GB |
-| Container CPU | 2 cores (server), 2 cores (DB) |
-| Container Memory | 2 GB (server), 1 GB (DB) |
+| 항목 | 값 |
+|------|-----|
+| 호스트 | Apple M5 Pro, 18 cores, 48 GB |
+| 컨테이너 CPU | 2 cores (서버), 2 cores (DB) |
+| 컨테이너 메모리 | 2 GB (서버), 1 GB (DB) |
 | k6 VUs | 10 |
-| k6 Duration | 30 seconds |
-| Iterations | 10 runs (averaged) |
+| k6 Duration | 30초 |
+| 반복 횟수 | 10회 (평균 계산) |
 
-> Identical resource constraints across all frameworks for fair comparison.
+> 모든 프레임워크에 동일한 리소스 제한을 적용하여 공정한 비교를 보장합니다.
 
 ---
 
-## Framework Status
+## 프레임워크 구현 현황
 
-| Framework | Architecture | Implemented | Benchmarked |
-|-----------|-------------|-------------|-------------|
+| 프레임워크 | 아키텍처 | 구현 | 벤치마크 |
+|-----------|----------|------|---------|
 | FastAPI | Pragmatic | ✅ | ✅ |
 | FastAPI | Strict (Clean Architecture) | ✅ | ✅ |
 | Django | DRF ViewSet | ✅ | ✅ |
@@ -111,11 +111,11 @@ Backend-Benchmark-Lab/
 
 ---
 
-## Benchmark Results (2026-03-27)
+## 벤치마크 결과 (2026-03-27)
 
-### Full Comparison: 5 Frameworks (RPS)
+### 전체 비교: 5개 프레임워크 (RPS)
 
-| Scenario | Express | FastAPI-P | FastAPI-S | Rails | Django |
+| 시나리오 | Express | FastAPI-P | FastAPI-S | Rails | Django |
 |----------|---------|-----------|-----------|-------|--------|
 | 01-lightweight | **20,492** | 14,225 | 13,928 | 3,632 | 2,899 |
 | 02-json-payload | **17,403** | 11,790 | 11,635 | 4,200 | 2,621 |
@@ -126,92 +126,92 @@ Backend-Benchmark-Lab/
 | 07-file-upload | **10,063** | 6,029 | 6,084 | 3,150 | 2,622 |
 | 08-mixed | 244 | 122 | 133 | **557** | 93 |
 
-> Express leads in lightweight throughput, but **Rails wins in DB reads (3x over Express) and mixed workloads (2.3x over Express)**. At the I/O boundary (05), all async frameworks converge. Django's synchronous processing is the bottleneck for external API calls.
+> Express가 경량 처리량에서 선두이지만, **Rails가 DB 읽기(Express 대비 3배)와 혼합 워크로드(Express 대비 2.3배)에서 1위**. I/O 경계(05)에서는 모든 비동기 프레임워크가 수렴. Django의 동기 처리가 외부 API 호출에서 병목.
 
 ![Framework RPS Comparison](assets/charts/01-framework-rps.png)
 
-### Rails: The Surprise Performer
+### Rails: 예상을 뒤엎은 강자
 
-- **DB Read #1** — ActiveRecord's efficient SELECT outperforms even Prisma (1,524 vs 498 RPS)
-- **Mixed Workload #1** — Puma's multi-threaded architecture excels at concurrency (557 vs 244 RPS)
-- **Most Stable** — Lowest coefficient of variation in mixed workload (CV 5.8% vs 45%+ for others)
-- Weak in lightweight scenarios (Ruby interpreter overhead)
+- **DB 읽기 1위** — ActiveRecord의 효율적 SELECT가 Prisma조차 앞섬 (1,524 vs 498 RPS)
+- **혼합 워크로드 1위** — Puma의 멀티스레드 아키텍처가 동시성 처리에서 압도적 (557 vs 244 RPS)
+- **최고 안정성** — 혼합 워크로드 변동계수 CV 5.8% (타 프레임워크 45% 이상)
+- 경량 시나리오에서는 Ruby 인터프리터 오버헤드로 약세
 
-### Clean Architecture: Zero Performance Penalty
+### Clean Architecture: 성능 패널티 제로
 
-FastAPI Strict (Clean Architecture) vs Pragmatic: **DB writes +19.4% faster**, standard deviation dramatically lower (lightweight: 37 vs 265). Layer separation improves both speed and stability.
+FastAPI Strict (Clean Architecture) vs Pragmatic: **DB 쓰기 +19.4% 향상**, 표준편차 대폭 감소 (lightweight: 37 vs 265). 레이어 분리가 속도와 안정성 모두를 개선.
 
 ![Clean Architecture vs Pragmatic](assets/charts/02-clean-architecture.png)
 
-### DB, Caching & Auth Highlights
+### DB, 캐싱, 인증 핵심 결과
 
-- **Cursor pagination** is 1.7x faster than OFFSET at deep pages (index seek vs full scan)
-- **Eager loading (JOIN)** solves N+1 with 4.1x speedup (21 queries down to 1)
-- **Bulk INSERT** via Raw VALUES is 187x faster than individual inserts (commit count is everything)
-- **Pessimistic lock** is the only safe choice under high concurrency (Serializable: 0.6% success rate)
-- **Redis cache hit** delivers 10x throughput + eliminates tail latency spikes
-- **Session auth beats JWT by 14%** in Python — GIL makes CPU-bound JWT verification slower than async Redis lookup
+- **Cursor 페이지네이션**: 깊은 페이지에서 OFFSET 대비 1.7x 빠름 (인덱스 탐색 vs 전체 스캔)
+- **Eager Loading (JOIN)**: N+1 문제 해결, 4.1x 향상 (쿼리 21개 -> 1개)
+- **대량 INSERT (Raw VALUES)**: 개별 INSERT 대비 187x 빠름 (commit 횟수가 전부)
+- **비관적 잠금**: 높은 동시성 환경에서 유일한 안전한 선택 (Serializable 성공률: 0.6%)
+- **Redis 캐시 히트**: 10x 처리량 + tail latency 스파이크 제거
+- **Session 인증이 JWT보다 14% 빠름** (Python) — GIL로 인해 CPU 바운드 JWT 검증이 비동기 Redis 조회보다 느림
 
 ![Caching Impact](assets/charts/03-caching-impact.png)
 
-### Server Config: Uvicorn vs Gunicorn (2026-03-02)
+### 서버 구성: Uvicorn vs Gunicorn (2026-03-02)
 
-> Same FastAPI app, 3 server configs (Uvicorn / Gunicorn+Uvicorn 2w / 4w), 5 rounds × 35 combinations × 3 runs = **105 total runs**
+> 동일 FastAPI 앱, 3가지 서버 구성 (Uvicorn / Gunicorn+Uvicorn 2w / 4w), 5 Round × 35조합 × 3회 = **총 105 runs**
 
-**Hypothesis Validation**
+**가설 검증 결과**
 
-| Hypothesis | Content | Result | Key Data |
-|------------|---------|--------|----------|
-| H1 | Single async process wins on I/O-bound | **Rejected** | gunicorn-4w is 3-6% faster, P99 gap 13% |
-| H2 | Multi-process wins on CPU-bound | **Accepted** | gunicorn-2w is **1.86x** faster (GIL bypass) |
-| H3 | Multi-process hurts on low CPU | **Conditional** | I/O: no harm, CPU: **98% collapse** |
+| 가설 | 내용 | 결과 | 핵심 데이터 |
+|------|------|------|------------|
+| H1 | I/O-bound에서 비동기 단일 프로세스 우세 | **기각** | gunicorn-4w가 3~6% 우세, P99에서 13% 격차 |
+| H2 | CPU-bound에서 멀티프로세스 우세 | **채택** | gunicorn-2w가 **1.86배** (GIL 우회) |
+| H3 | 저사양에서 멀티프로세스 역효과 | **조건부 채택** | I/O → 역효과 없음, CPU → **98% 성능 하락** |
 
-**Key Results**
+**Round별 핵심 결과**
 
-| Round | Workload | CPU | Winner | Key Data |
-|-------|----------|-----|--------|----------|
-| R1 | I/O (sleep) | 1 vCPU | gunicorn-4w | +6% RPS, P99 126→145ms gap at VU=200 |
-| R2 | CPU (fibonacci) | 2 vCPU | gunicorn-2w | **1.86x** RPS, uvicorn P99=60s timeout |
-| R3 | I/O (sleep) | 0.25 vCPU | ~tie | All 3 configs stable, <5% diff |
-| R4 | CPU (fibonacci) | 0.25 vCPU | uvicorn | **3.4x** — gunicorn-4w gets 0.27 RPS |
-| R5 | Mixed (DB+compute) | 1/2 vCPU | depends | 1 vCPU: uvicorn, 2 vCPU: gunicorn-2w (1.7x) |
+| Round | 워크로드 | CPU | 승자 | 핵심 데이터 |
+|-------|---------|-----|------|------------|
+| R1 | I/O (sleep) | 1 vCPU | gunicorn-4w | +6% RPS, VU=200에서 P99 126→145ms 격차 |
+| R2 | CPU (fibonacci) | 2 vCPU | gunicorn-2w | **1.86배** RPS, uvicorn P99=60초 타임아웃 |
+| R3 | I/O (sleep) | 0.25 vCPU | ~동등 | 3가지 구성 모두 안정, 5% 이내 차이 |
+| R4 | CPU (fibonacci) | 0.25 vCPU | uvicorn | **3.4배** — gunicorn-4w는 0.27 RPS |
+| R5 | Mixed (DB+연산) | 1/2 vCPU | 상황별 | 1 vCPU: uvicorn, 2 vCPU: gunicorn-2w (1.7배) |
 
-**Deployment Guide**
+**배포 가이드**
 
-| Workload | ≤1 vCPU | 2+ vCPU |
-|----------|---------|---------|
-| **I/O-bound** (API calls, DB) | Uvicorn standalone | Gunicorn + N workers (slight gain) |
-| **CPU-bound** (compute, hashing) | Uvicorn standalone | **Gunicorn + N workers required** (N = vCPU) |
-| **Mixed** (real-world) | Uvicorn standalone | **Gunicorn + N workers required** (N = vCPU) |
+| 워크로드 유형 | 1 vCPU 이하 | 2+ vCPU |
+|--------------|-------------|---------|
+| **I/O-bound** (API 호출, DB 쿼리) | Uvicorn 단독 | Gunicorn + N워커 (약간 이득) |
+| **CPU-bound** (연산, 해싱) | Uvicorn 단독 | **Gunicorn + N워커 필수** (N = vCPU 수) |
+| **Mixed** (현실적 서비스) | Uvicorn 단독 | **Gunicorn + N워커 필수** (N = vCPU 수) |
 
-**Lessons**: (1) Workers > vCPU = service-level failure on CPU-bound, (2) Single event loop can't utilize additional CPUs — Uvicorn@1vCPU ≈ Uvicorn@2vCPU, (3) I/O-bound needs almost no CPU — 0.25 vCPU ≈ 1 vCPU throughput.
+**교훈**: (1) workers > vCPU = CPU-bound에서 서비스 장애 수준, (2) 단일 프로세스는 추가 CPU를 활용 불가 — Uvicorn@1vCPU ≈ Uvicorn@2vCPU, (3) I/O-bound에서 CPU는 거의 무관 — 0.25 vCPU ≈ 1 vCPU 처리량.
 
 ![Server Config Benchmark](assets/charts/04-server-config.png)
 
 ---
 
-## Key Insights
+## 핵심 인사이트
 
-1. **"Nx faster" is a half-truth** — Express is 7x faster than Django in lightweight, but Rails beats everyone in DB reads and mixed workloads.
-2. **The bottleneck is rarely the framework** — Optimization priority: DB queries > Caching > Infra config > Framework choice.
-3. **Rails DB performance is surprisingly strong** — ActiveRecord + Puma beats Express (Prisma) 3x in DB reads and 2.3x in mixed workloads.
-4. **Clean Architecture has zero performance penalty** — Actually 15-19% faster on DB operations with much lower variance.
-5. **Server config matters more than framework choice** — 1.86x improvement from proper worker configuration alone.
-6. **Python's GIL reverses JWT vs Session** — Session is 14% faster; CPU-bound JWT verification suffers under the GIL.
-7. **"Fewer queries = faster" is false** — 3 separate ORM queries beat 1 combined Raw SQL by 1.4x (optimizer picks better plans per query).
-8. **Commit count determines 99% of bulk performance** — Individual INSERT (2.98s) vs Raw VALUES (15.91ms) = 187x difference.
-9. **Mixed workload = real-world proxy** — Scenario 08 results (Rails #1) best represent actual production traffic patterns.
+1. **"N배 빠르다"는 반쪽짜리 진실** — Express가 lightweight에서 Django보다 7배 빠르지만, DB 읽기와 혼합 워크로드에서는 Rails가 전체 1위.
+2. **병목은 프레임워크가 아니다** — 최적화 우선순위: DB 쿼리 > 캐싱 > 인프라 설정 > 프레임워크 선택.
+3. **Rails의 DB 성능은 예상 외로 강력하다** — ActiveRecord + Puma가 Express(Prisma) 대비 DB 읽기 3배, 혼합 워크로드 2.3배.
+4. **Clean Architecture는 성능 패널티가 없다** — 오히려 DB 작업에서 15-19% 빠르고 분산이 훨씬 낮음.
+5. **서버 구성이 프레임워크 선택보다 중요하다** — 적절한 worker 설정만으로 1.86x 성능 향상.
+6. **Python GIL이 JWT vs Session 성능을 역전시킨다** — Session이 14% 빠름. CPU 바운드 JWT 검증이 GIL 하에서 비효율적.
+7. **"쿼리 1개 = 더 빠르다"는 거짓** — ORM 3개 분리 쿼리가 Raw SQL 1개 합침보다 1.4x 빠름 (옵티마이저가 쿼리별 최적 계획 선택).
+8. **commit 횟수가 대량 처리 성능의 99%를 결정** — Individual INSERT (2.98s) vs Raw VALUES (15.91ms) = 187배 차이.
+9. **혼합 워크로드 = 실제 트래픽의 프록시** — 시나리오 08 결과 (Rails 1위)가 실제 프로덕션 트래픽 패턴을 가장 잘 대변.
 
 ---
 
-## Getting Started
+## 실행 방법
 
-### Start a benchmark target
+### 벤치마크 대상 시작
 
 ```bash
 cd implementations
 
-# Choose a framework (pick one)
+# 프레임워크 선택 (택 1)
 docker compose --profile fastapi-pragmatic up -d
 docker compose --profile fastapi-strict up -d
 docker compose --profile django up -d
@@ -219,16 +219,16 @@ docker compose --profile express up -d
 docker compose --profile rails up -d
 ```
 
-### Run benchmarks
+### 벤치마크 실행
 
 ```bash
 cd runner
-./run-benchmark.sh python-fastapi-pragmatic    # All scenarios for FastAPI
-./run-benchmark.sh typescript-express 05        # Single scenario
-./run-benchmark.sh ruby-rails 03+              # From scenario 03 onwards
+./run-benchmark.sh python-fastapi-pragmatic    # FastAPI 전체 시나리오
+./run-benchmark.sh typescript-express 05        # 단일 시나리오
+./run-benchmark.sh ruby-rails 03+              # 03번부터 끝까지
 ```
 
-### Monitoring (optional)
+### 모니터링 (선택)
 
 ```bash
 cd monitoring
@@ -238,32 +238,32 @@ docker compose up -d
 
 ---
 
-## Roadmap
+## 로드맵
 
-### Completed
+### 완료
 
-- [x] Infrastructure (Docker, k6, Prometheus + Grafana)
-- [x] Basic scenarios 01-08 (5 frameworks)
-- [x] FastAPI Pragmatic vs Strict architecture comparison
-- [x] DB Advanced 09-13 (Pagination, Column, N+1, Bulk, Transactions)
-- [x] Caching 14-16 (Redis hit/miss)
-- [x] Authentication 17 (JWT vs Session)
-- [x] Aggregation 18 (ORM vs Raw SQL)
-- [x] Server configuration experiment (Uvicorn vs Gunicorn, 105 runs)
-- [x] Ruby Rails 8 implementation + benchmarks
+- [x] 인프라 (Docker, k6, Prometheus + Grafana)
+- [x] Basic 시나리오 01-08 (5개 프레임워크)
+- [x] FastAPI Pragmatic vs Strict 아키텍처 비교
+- [x] DB 심화 09-13 (Pagination, Column, N+1, Bulk, Transactions)
+- [x] 캐싱 14-16 (Redis Hit/Miss)
+- [x] 인증 17 (JWT vs Session)
+- [x] 집계 18 (ORM vs Raw SQL)
+- [x] 서버 구성 실험 (Uvicorn vs Gunicorn, 105회)
+- [x] Ruby Rails 8 구현 + 벤치마크
 
-### Planned
+### 예정
 
-- [ ] Go Fiber implementation + JWT vs Session validation
-- [ ] Flask, Fastify, NestJS implementations
-- [ ] Text search (LIKE vs Full-text)
-- [ ] E2E flow (Auth -> Read -> Write -> Response)
-- [ ] Rails Solid Cache vs Redis
-- [ ] Stress testing (spike traffic, long-running)
+- [ ] Go Fiber 구현 + JWT vs Session 검증
+- [ ] Flask, Fastify, NestJS 구현
+- [ ] 텍스트 검색 (LIKE vs Full-text)
+- [ ] E2E 플로우 (인증 -> 조회 -> 수정 -> 응답)
+- [ ] Rails Solid Cache vs Redis 비교
+- [ ] 스트레스 테스트 (스파이크, 장시간 부하)
 - [ ] Pydantic vs msgspec, SQLAlchemy vs Raw asyncpg
 
 ---
 
-## License
+## 라이선스
 
-This project is licensed under the [MIT License](LICENSE).
+이 프로젝트는 [MIT 라이선스](LICENSE)로 제공됩니다.
