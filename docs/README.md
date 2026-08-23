@@ -1,6 +1,6 @@
 # docs — Backend Benchmark Lab
 
-> Claude가 작성한 시나리오 스펙·가이드·계획의 디렉터리. 사용자 산출물(Q&A·회고·발견)은 `../learnings/`에 둔다.
+> Claude가 작성한 시나리오 스펙·가이드·계획을 모아둔 디렉터리. 사용자 산출물(Q&A·회고·발견)은 `../learnings/`에 둔다.
 
 관련 파일
 - `benchmark-results.md` — 프레임워크별 RPS/Latency 결과 비교표와 측정 환경
@@ -42,10 +42,10 @@
 | 27 | Server config results | [27-server-config-results.md](scenarios/27-server-config-results.md) |
 | 28 | Java Spring Boot implementation | [28-java-spring-boot-implementation.md](scenarios/28-java-spring-boot-implementation.md) |
 
-진행 상태는 `../roadmap.md`를 정본으로 본다.
+진행 상태는 `../roadmap.md`를 정본으로 삼는다.
 
 ---
 
 ## Benchmark Results
 
-프레임워크별 결과 비교표·메트릭 해석·측정 환경은 [benchmark-results.md](benchmark-results.md) 참조.
+프레임워크별 결과 비교표·메트릭 해석·측정 환경은 [benchmark-results.md](benchmark-results.md)를 참조.

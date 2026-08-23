@@ -2,13 +2,13 @@
 
 [![English](https://img.shields.io/badge/lang-English-blue)](README.en.md)
 
-> **"동일 로직, 다른 구현"** — 백엔드 프레임워크 성능을 실증적으로 검증하는 벤치마크 실험실
+> **"동일한 로직, 서로 다른 구현"** — 같은 API를 여러 백엔드 프레임워크로 구현하고 실제 시나리오에서 성능을 비교한 실험실
 
 ## 하이라이트
 
-- **4개 언어, 5개 프레임워크**를 동일 API 스펙 위에서 공정 비교
-- **26개 실전 시나리오** ("Hello World"가 아닌): N+1, 캐싱, 인증, 트랜잭션, 서버 구성
-- **105회 서버 구성 테스트**로 배포 튜닝이 프레임워크 선택보다 중요함을 입증
+- **4개 언어, 5개 프레임워크**를 동일한 API 스펙으로 비교
+- **26개 실전 시나리오**: "Hello World"가 아니라 N+1, 캐싱, 인증, 트랜잭션, 서버 구성까지 측정
+- **105회 서버 구성 테스트**로 배포 튜닝이 프레임워크 선택만큼 중요하다는 점을 확인
 - 모든 수치는 리소스 제한된 Docker 컨테이너에서 **k6 10회 반복 평균**
 
 ![Framework RPS Comparison](assets/charts/01-framework-rps.png)
@@ -17,9 +17,9 @@
 
 ## 왜 만들었나
 
-회사에서 FastAPI를 쓰고 있었지만, **왜 이 프레임워크를 쓰는지** 명확히 설명할 수 없었습니다. "빠르다"는 말은 많은데, 어떤 상황에서 얼마나 빠른지, 다른 프레임워크와 구조적으로 어떻게 다른지 직접 검증하고 싶었습니다.
+회사에서 FastAPI를 쓰고 있었지만, **왜 이 프레임워크를 선택했는지** 명확히 설명하기는 어려웠습니다. "빠르다"는 말은 많지만 어떤 상황에서 얼마나 빠른지, 다른 프레임워크와 구조적으로 무엇이 다른지는 직접 확인해보고 싶었습니다.
 
-단순한 합성 벤치마크 대신 실전 시나리오를 구축해 **데이터 기반으로 기술 선택의 근거를 확보**하는 것이 목표입니다.
+단순한 합성 벤치마크 대신 실전 시나리오를 만들고, **데이터를 바탕으로 기술 선택의 근거를 확보**하는 것이 목표였습니다.
 
 ---
 
@@ -59,7 +59,7 @@ Backend-Benchmark-Lab/
 └── monitoring/               # Prometheus + Grafana
 ```
 
-> 문서는 **작성 주체**에 따라 분리되어 있습니다. `docs/`는 Claude가 쓴 스펙·계획·결과표, `learnings/`는 제가 직접 쓴 Q&A·회고·크로스커팅 심화입니다. 전체 인덱스는 [`docs/README.md`](docs/README.md)와 [`learnings/README.md`](learnings/README.md)를 참조하세요.
+> 문서는 **작성 주체**를 기준으로 나눴습니다. `docs/`에는 Claude가 작성한 스펙·계획·결과표가 있고, `learnings/`에는 제가 직접 정리한 Q&A·회고·크로스커팅 심화가 있습니다. 전체 인덱스는 [`docs/README.md`](docs/README.md)와 [`learnings/README.md`](learnings/README.md)를 참조하세요.
 
 ---
 
@@ -94,7 +94,7 @@ Backend-Benchmark-Lab/
 | k6 Duration | 30초 |
 | 반복 횟수 | 10회 (평균 계산) |
 
-> 모든 프레임워크에 동일한 리소스 제한을 적용하여 공정한 비교를 보장합니다.
+> 모든 프레임워크에 동일한 리소스 제한을 적용해 비교 조건을 맞췄습니다.
 
 ---
 
@@ -126,20 +126,20 @@ Backend-Benchmark-Lab/
 | 07-file-upload | **10,063** | 6,029 | 6,084 | 3,150 | 2,622 |
 | 08-mixed | 244 | 122 | 133 | **557** | 93 |
 
-> Express가 경량 처리량에서 선두이지만, **Rails가 DB 읽기(Express 대비 3배)와 혼합 워크로드(Express 대비 2.3배)에서 1위**. I/O 경계(05)에서는 모든 비동기 프레임워크가 수렴. Django의 동기 처리가 외부 API 호출에서 병목.
+> Express는 경량 처리량에서 가장 앞섰지만, **DB 읽기(Express 대비 3배)와 혼합 워크로드(Express 대비 2.3배)에서는 Rails가 1위**였습니다. I/O 경계(05)에서는 비동기 프레임워크들의 결과가 비슷하게 수렴했고, Django는 동기 처리 때문에 외부 API 호출에서 병목이 생겼습니다.
 
 ![Framework RPS Comparison](assets/charts/01-framework-rps.png)
 
 ### Rails: 예상을 뒤엎은 강자
 
-- **DB 읽기 1위** — ActiveRecord의 효율적 SELECT가 Prisma조차 앞섬 (1,524 vs 498 RPS)
-- **혼합 워크로드 1위** — Puma의 멀티스레드 아키텍처가 동시성 처리에서 압도적 (557 vs 244 RPS)
-- **최고 안정성** — 혼합 워크로드 변동계수 CV 5.8% (타 프레임워크 45% 이상)
+- **DB 읽기 1위** — ActiveRecord의 효율적인 SELECT가 Prisma보다 높은 처리량을 보임 (1,524 vs 498 RPS)
+- **혼합 워크로드 1위** — Puma의 멀티스레드 구조가 동시성 처리에서 강하게 작동 (557 vs 244 RPS)
+- **가장 낮은 변동성** — 혼합 워크로드 변동계수 CV 5.8% (다른 프레임워크는 45% 이상)
 - 경량 시나리오에서는 Ruby 인터프리터 오버헤드로 약세
 
-### Clean Architecture: 성능 패널티 제로
+### Clean Architecture: 성능 손실 없음
 
-FastAPI Strict (Clean Architecture) vs Pragmatic: **DB 쓰기 +19.4% 향상**, 표준편차 대폭 감소 (lightweight: 37 vs 265). 레이어 분리가 속도와 안정성 모두를 개선.
+FastAPI Strict (Clean Architecture)는 Pragmatic 구현과 비교했을 때 **DB 쓰기에서 +19.4% 높은 처리량**을 보였고, 표준편차도 크게 줄었습니다(lightweight: 37 vs 265). 이 실험에서는 레이어 분리가 속도와 안정성 모두에 도움이 됐습니다.
 
 ![Clean Architecture vs Pragmatic](assets/charts/02-clean-architecture.png)
 
@@ -147,16 +147,16 @@ FastAPI Strict (Clean Architecture) vs Pragmatic: **DB 쓰기 +19.4% 향상**, �
 
 - **Cursor 페이지네이션**: 깊은 페이지에서 OFFSET 대비 1.7x 빠름 (인덱스 탐색 vs 전체 스캔)
 - **Eager Loading (JOIN)**: N+1 문제 해결, 4.1x 향상 (쿼리 21개 -> 1개)
-- **대량 INSERT (Raw VALUES)**: 개별 INSERT 대비 187x 빠름 (commit 횟수가 전부)
+- **대량 INSERT (Raw VALUES)**: 개별 INSERT 대비 187x 빠름 (커밋 횟수가 핵심)
 - **비관적 잠금**: 높은 동시성 환경에서 유일한 안전한 선택 (Serializable 성공률: 0.6%)
 - **Redis 캐시 히트**: 10x 처리량 + tail latency 스파이크 제거
-- **Session 인증이 JWT보다 14% 빠름** (Python) — GIL로 인해 CPU 바운드 JWT 검증이 비동기 Redis 조회보다 느림
+- **Session 인증이 JWT보다 14% 빠름** (Python) — GIL 때문에 CPU 바운드 JWT 검증이 비동기 Redis 조회보다 느림
 
 ![Caching Impact](assets/charts/03-caching-impact.png)
 
 ### 서버 구성: Uvicorn vs Gunicorn (2026-03-02)
 
-> 동일 FastAPI 앱, 3가지 서버 구성 (Uvicorn / Gunicorn+Uvicorn 2w / 4w), 5 Round × 35조합 × 3회 = **총 105 runs**
+> 동일한 FastAPI 앱을 3가지 서버 구성(Uvicorn / Gunicorn+Uvicorn 2w / 4w)으로 측정했습니다. 5 Round × 35조합 × 3회 = **총 105 runs**
 
 **가설 검증 결과**
 
@@ -180,11 +180,11 @@ FastAPI Strict (Clean Architecture) vs Pragmatic: **DB 쓰기 +19.4% 향상**, �
 
 | 워크로드 유형 | 1 vCPU 이하 | 2+ vCPU |
 |--------------|-------------|---------|
-| **I/O-bound** (API 호출, DB 쿼리) | Uvicorn 단독 | Gunicorn + N워커 (약간 이득) |
+| **I/O-bound** (API 호출, DB 쿼리) | Uvicorn 단독 | Gunicorn + N워커 (소폭 이득) |
 | **CPU-bound** (연산, 해싱) | Uvicorn 단독 | **Gunicorn + N워커 필수** (N = vCPU 수) |
 | **Mixed** (현실적 서비스) | Uvicorn 단독 | **Gunicorn + N워커 필수** (N = vCPU 수) |
 
-**교훈**: (1) workers > vCPU = CPU-bound에서 서비스 장애 수준, (2) 단일 프로세스는 추가 CPU를 활용 불가 — Uvicorn@1vCPU ≈ Uvicorn@2vCPU, (3) I/O-bound에서 CPU는 거의 무관 — 0.25 vCPU ≈ 1 vCPU 처리량.
+**교훈**: (1) worker 수가 vCPU를 넘으면 CPU-bound에서는 장애에 가까운 성능 하락이 생긴다. (2) 단일 프로세스는 추가 CPU를 활용하지 못한다 — Uvicorn@1vCPU ≈ Uvicorn@2vCPU. (3) I/O-bound에서는 CPU 차이가 거의 드러나지 않았다 — 0.25 vCPU ≈ 1 vCPU 처리량.
 
 ![Server Config Benchmark](assets/charts/04-server-config.png)
 
@@ -192,15 +192,15 @@ FastAPI Strict (Clean Architecture) vs Pragmatic: **DB 쓰기 +19.4% 향상**, �
 
 ## 핵심 인사이트
 
-1. **"N배 빠르다"는 반쪽짜리 진실** — Express가 lightweight에서 Django보다 7배 빠르지만, DB 읽기와 혼합 워크로드에서는 Rails가 전체 1위.
-2. **병목은 프레임워크가 아니다** — 최적화 우선순위: DB 쿼리 > 캐싱 > 인프라 설정 > 프레임워크 선택.
+1. **"N배 빠르다"는 반쪽짜리 진실** — Express는 lightweight에서 Django보다 7배 빠르지만, DB 읽기와 혼합 워크로드에서는 Rails가 전체 1위.
+2. **병목은 프레임워크가 아닐 때가 많다** — 최적화 우선순위: DB 쿼리 > 캐싱 > 인프라 설정 > 프레임워크 선택.
 3. **Rails의 DB 성능은 예상 외로 강력하다** — ActiveRecord + Puma가 Express(Prisma) 대비 DB 읽기 3배, 혼합 워크로드 2.3배.
-4. **Clean Architecture는 성능 패널티가 없다** — 오히려 DB 작업에서 15-19% 빠르고 분산이 훨씬 낮음.
-5. **서버 구성이 프레임워크 선택보다 중요하다** — 적절한 worker 설정만으로 1.86x 성능 향상.
-6. **Python GIL이 JWT vs Session 성능을 역전시킨다** — Session이 14% 빠름. CPU 바운드 JWT 검증이 GIL 하에서 비효율적.
-7. **"쿼리 1개 = 더 빠르다"는 거짓** — ORM 3개 분리 쿼리가 Raw SQL 1개 합침보다 1.4x 빠름 (옵티마이저가 쿼리별 최적 계획 선택).
-8. **commit 횟수가 대량 처리 성능의 99%를 결정** — Individual INSERT (2.98s) vs Raw VALUES (15.91ms) = 187배 차이.
-9. **혼합 워크로드 = 실제 트래픽의 프록시** — 시나리오 08 결과 (Rails 1위)가 실제 프로덕션 트래픽 패턴을 가장 잘 대변.
+4. **Clean Architecture는 성능 손실이 없었다** — 오히려 DB 작업에서 15-19% 빠르고 분산이 훨씬 낮았다.
+5. **서버 구성이 프레임워크 선택보다 중요할 수 있다** — 적절한 worker 설정만으로 1.86x 성능 향상.
+6. **Python GIL이 JWT vs Session 성능을 역전시킬 수 있다** — Session이 14% 빠름. CPU 바운드 JWT 검증이 GIL 하에서 비효율적이었다.
+7. **"쿼리 1개 = 더 빠르다"는 항상 맞지 않다** — ORM 3개 분리 쿼리가 Raw SQL 1개보다 1.4x 빨랐다. 옵티마이저가 쿼리별 최적 계획을 고른 영향으로 보인다.
+8. **커밋 횟수가 대량 처리 성능을 크게 좌우한다** — Individual INSERT (2.98s) vs Raw VALUES (15.91ms) = 187배 차이.
+9. **혼합 워크로드는 실제 트래픽에 가까운 대리 지표다** — 시나리오 08 결과(Rails 1위)가 프로덕션 트래픽 패턴을 가장 잘 대변한다고 봤다.
 
 ---
 
